@@ -92,29 +92,6 @@
             <version>${logback.version}</version>
         </dependency>
 
-        <!-- This dep forces slf4j instead of log4j -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>log4j-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <!--
-         This dep forces slf4j instead of java native logging
-         Beware of the perf impact !
-        -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jul-to-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
-        <!-- This dep forces slf4j instead of Jakarta Commons Logging -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>jcl-over-slf4j</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
 
 
         <dependency>
