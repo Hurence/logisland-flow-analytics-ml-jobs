@@ -38,47 +38,58 @@ engine:
     spark.streaming.receiver.writeAheadLog.enable: false
     spark.ui.port: 4050
 
-
-  controllerServiceConfigurations:
-
-     - controllerService: elasticsearch_service
-        component: com.hurence.logisland.service.elasticsearch.Elasticsearch_2_4_0_ClientService
-        type: service
-        documentation: elasticsearch 2.4.0 service implementation
-        configuration:
-          hosts: sd-84186:9300,sd-84192:9300,sd-84196:9300,sd-84191:9300,sd-84190:9300
-          cluster.name: elastic-hurence
-          batch.size: 5000
-
   streamConfigurations:
 
-
-    - stream: indexing_stream
+    - stream: parsing_stream
       component: com.hurence.logisland.stream.spark.KafkaRecordStreamParallelProcessing
       type: stream
       documentation: a processor that links
       configuration:
-        kafka.input.topics: binetflow_events
-        kafka.output.topics: none
+        kafka.input.topics: binetflow_raw
+        kafka.output.topics: binetflow_events
         kafka.error.topics: _errors
-        kafka.input.topics.serializer: com.hurence.logisland.serializer.KryoSerializer
-        kafka.output.topics.serializer: none
+        kafka.input.topics.serializer: none
+        kafka.output.topics.serializer: com.hurence.logisland.serializer.KryoSerializer
         kafka.error.topics.serializer: com.hurence.logisland.serializer.JsonSerializer
         kafka.metadata.broker.list: sd-84190:6667,sd-84191:6667,sd-84192:6667,sd-84186:6667
         kafka.zookeeper.quorum: sd-76387:2181,sd-84186:2181,sd-84189:2181
         kafka.topic.autoCreate: true
         kafka.topic.default.partitions: 20
         kafka.topic.default.replicationFactor: 3
+        kafka.message.key.field: record_id
       processorConfigurations:
 
-        - processor: es_publisher
-          component: com.hurence.logisland.processor.elasticsearch.BulkAddElasticsearch
-          type: processor
-          documentation: A processor that pushes Bro events into ES
+        - processor: bi_netflow_parser
+          component: com.hurence.logisland.processor.SplitText
+          type: parser
+          documentation: a parser that produce events from bi-directionnal netflow logs
           configuration:
-            elasticsearch.client.service: elasticsearch_service
-            default.index: ctu-13
-            default.type: bi_netflow
-            timebased.index: no
-            es.index.field: search_index
-            es.type.field: record_type
+            record.type: bi_netflow
+            value.regex: (\d{4}\/\d{2}\/\d{2}\s\d{1,2}:\d{1,2}:\d{1,2}\.\d{0,6}),([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,flow=([^,]+)
+            value.fields: timestamp,duration,protocol,src_ip,src_port,direction,dest_ip,dest_port,state,src_tos,dest_tos,packets_out,bytes_out,bytes_in,label
+
+        - processor: field_types_converter
+          component: com.hurence.logisland.processor.ConvertFieldsType
+          type: processor
+          documentation: convert some field to a given type
+          configuration:
+            bytes_in: long
+            bytes_out: long
+            packets_out: long
+            duration: float
+            src_tos: int
+            dest_tos: int
+
+        - processor: date_updater
+          component: com.hurence.logisland.processor.UpdateBiNetflowDate
+          type: processor
+          documentation: compute record_time
+
+        - processor: id_modifier
+          component: com.hurence.logisland.processor.ModifyId
+          type: processor
+          documentation: convert some field to a given type
+          configuration:
+            id.generation.strategy: fromFields
+            fields.to.hash: record_time,src_ip,dest_ip
+            java.formatter.string: "%s-%s-%s"
