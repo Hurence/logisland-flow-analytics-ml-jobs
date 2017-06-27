@@ -19,6 +19,8 @@ package com.hurence.logisland.processor;
 import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
+import com.hurence.logisland.logging.ComponentLog;
+import com.hurence.logisland.logging.StandardComponentLogger;
 import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
@@ -34,7 +36,7 @@ import java.util.*;
 @CapabilityDescription("Post processing step to update a dte field in a custom way")
 public class UpdateBiNetflowDate extends AbstractProcessor {
 
-    private static final Logger logger = LoggerFactory.getLogger(UpdateBiNetflowDate.class);
+    private final ComponentLog logger = new StandardComponentLogger("UpdateBiNetflowDate", this);
 
 
     @Override
@@ -43,15 +45,16 @@ public class UpdateBiNetflowDate extends AbstractProcessor {
         sdf.setTimeZone(TimeZone.getTimeZone("GMT+1"));
         for (Record outputRecord : records) {
 
-            String eventTimeString = outputRecord.getField("timestamp").asString();
+
             try {
+                String eventTimeString = outputRecord.getField("timestamp").asString();
                 Date eventDate = sdf.parse(eventTimeString.substring(0, eventTimeString.length() -3));
 
                 if (eventDate != null) {
                     outputRecord.setField(FieldDictionary.RECORD_TIME, FieldType.LONG, eventDate.getTime() - 60*60*1000);
                 }
             } catch (Exception e) {
-                logger.warn("unable to parse date {}", eventTimeString);
+                outputRecord.addError("unable to parse date", logger, e.toString());
             }
 
         }
