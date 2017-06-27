@@ -54,7 +54,8 @@ public class UpdateBiNetflowDate extends AbstractProcessor {
                     outputRecord.setField(FieldDictionary.RECORD_TIME, FieldType.LONG, eventDate.getTime() - 60*60*1000);
                 }
             } catch (Exception e) {
-                outputRecord.addError("unable to parse date", logger, e.getMessage());
+                String error = "error parsing in record: " + outputRecord + ", " + e.toString();
+                outputRecord.addError("unable to parse date", logger, error);
             }
 
         }
