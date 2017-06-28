@@ -1,6 +1,5 @@
 package com.hurence.logisland.jobs;
 
-
 import com.hurence.botsearch.analytics.NetworkTrace;
 import com.hurence.logisland.botsearch.HttpFlow;
 import com.hurence.logisland.botsearch.Trace;
@@ -10,6 +9,7 @@ import com.hurence.logisland.processor.StandardProcessContext;
 import com.hurence.logisland.processor.UpdateBiNetflowDate;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.RecordUtils;
+import org.apache.commons.cli.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -34,18 +34,61 @@ public class KMeansClustering {
 
     public static void main(String[] args) {
 
-        String appName = "KMeansClustering";
+        // Command line management :
+
+        Parser parser = new GnuParser();
+        Options options = new Options();
+
+        String helpMsg = "Print this message.";
+        Option help = new Option("help", helpMsg);
+        options.addOption(help);
+
+        String nbOfClustersMsg = "Number of clusters";
+        OptionBuilder.withArgName("nbClusters");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(nbOfClustersMsg);
+        OptionBuilder.isRequired(true);
+        Option nbOfClusters = OptionBuilder.create("nbClusters");
+        options.addOption(nbOfClusters);
+
+        String nbOfIterationsMsg = "Number of iterations";
+        OptionBuilder.withArgName("nbIterations");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(nbOfIterationsMsg);
+        OptionBuilder.isRequired(true);
+        Option nbOfIterations = OptionBuilder.create("nbIterations");
+        options.addOption(nbOfIterations);
+
+        int nbClusters = 8;
+        int nbIterations = 20;
+
+        try {
+            // parse the command line arguments
+            CommandLine line = parser.parse(options, args);
+
+            if(!line.getOptionValue("nbClusters").isEmpty()) {
+                nbClusters = Integer.parseInt(line.getOptionValue("nbClusters"));
+            }
+            if(!line.getOptionValue("nbIterations").isEmpty()) {
+                nbIterations = Integer.parseInt(line.getOptionValue("nbIterations"));
+            }
+
+        } catch (Exception e) {
+        }
+
+        System.out.println("Nb of clusters = " + nbClusters);
+        System.out.println("Nb of iterations = " + nbIterations);
+
+
 
         // Initialize Spark configuration & context
+        String appName = "KMeansClustering";
         SparkConf sparkConf = new SparkConf().setAppName(appName).setMaster("local[1]").set("spark.executor.memory", "512m");
-
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
-        // Read data file from Hadoop file system.
+        // Read data file from file system and return it as RDD of strings:
         //String path = "hdfs://sandbox.hortonworks.com:8020/user/hurence/flows.txt";
         String path = "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\resources\\light_capture_100000.txt";
-
-        // Read the data file and return it as RDD of strings
         JavaRDD<String> linesRDD = sc.textFile(path);
 
         // Split Text Processor :
@@ -76,11 +119,11 @@ public class KMeansClustering {
         };
 
         JavaPairRDD<String, Record> flowsRDD = linesRDD.mapToPair(mapFunction);
-        //JavaRDD<Tuple2<String,Record>> flowsRDD = linesRDD.map(mapFunction);
 
+        ///////////////////////////////
+        // Compute traces from flows //
+        ///////////////////////////////
 
-        ////////////////////////////////////////
-        // Compute traces from flows
         JavaRDD<Tuple2<String, NetworkTrace>> traces = flowsRDD.
                 groupByKey()
                 .map(t -> {
@@ -159,11 +202,10 @@ public class KMeansClustering {
         JavaRDD<Tuple2<String, Vector>> scaledTraces = tracesTuple.map(x -> new Tuple2<>(x._1, scalerModel.transform(x._2)));
 
         // TODO add an automated job which compute best parameters
-        // Cluster the data into two classes using KMeans
-        int numClusters = 8;
-        int numIterations = 20;
-        // Cluster the data into two classes using KMeans k:$numClusters, numIterations:$numIterations
-        KMeansModel clusters = KMeans.train(scaledTraces.map(x -> x._2).rdd(), numClusters, numIterations);
+        // Cluster the data into two classes using KMeans k:$nbClusters, nbIterations:$nbIterations
+        KMeansModel clusters = KMeans.train(scaledTraces.map(x -> x._2).rdd(), nbClusters, nbIterations);
+
+        clusters.save(sc.sc(), "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\resources\\clusters");
 
         // Evaluate clustering by computing Within Set Sum of Squared Errors
         double WSSSE = clusters.computeCost(scaledTraces.map(x -> x._2).rdd());
