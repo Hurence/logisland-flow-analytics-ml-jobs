@@ -31,7 +31,7 @@ public class UpdateBiNetflowDateTest extends BaseSyslogTest {
         record1.setField(FieldDictionary.RECORD_TIME, FieldType.LONG, PROCESSING_DATE.getTime());
         record1.setField(FieldDictionary.RECORD_TYPE, FieldType.STRING, "bi_netflow");
 
-        record1.setField("timestamp", FieldType.STRING, "2011/08/10 12:56:20.942510");
+        record1.setField("timestamp", FieldType.STRING, "2011/08/10 12:04:02.770809");
 
 
         return record1;
@@ -52,7 +52,7 @@ public class UpdateBiNetflowDateTest extends BaseSyslogTest {
 
         System.out.println(new Date(record.getField(FieldDictionary.RECORD_TIME).asLong()));
 
-        record.assertFieldEquals(FieldDictionary.RECORD_TIME, 1312973780942L);
+        record.assertFieldEquals(FieldDictionary.RECORD_TIME, 1312970642770L);
 
 
     }

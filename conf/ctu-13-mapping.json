@@ -1,0 +1,81 @@
+{
+  "mappings": {
+    "bi_netflow": {
+      "properties": {
+        "bytes_in": {
+          "type": "long"
+        },
+        "packets_out": {
+          "type": "long"
+        },
+        "src_tos": {
+          "type": "long"
+        },
+        "record_raw_value": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string",
+          "analyzer": "keyword"
+        },
+        "dest_tos": {
+          "type": "long"
+        },
+        "record_type": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "double"
+        },
+        "src_ip": {
+          "type" : "ip",
+          "index":"not_analyzed",
+          "ignore_malformed": true
+        },
+        "src_port": {
+          "type": "string"
+        },
+        "record_id": {
+          "type": "string"
+        },
+        "protocol": {
+          "type": "string",
+          "analyzer": "keyword"
+        },
+        "@timestamp": {
+          "format": "strict_date_optional_time||epoch_millis",
+          "type": "date"
+        },
+        "bytes_out": {
+          "type": "long"
+        },
+        "record_errors": {
+          "type": "string"
+        },
+        "dest_ip": {
+          "type" : "ip",
+          "index":"not_analyzed",
+          "ignore_malformed": true
+        },
+        "state": {
+          "type": "string",
+          "analyzer": "keyword"
+        },
+        "record_time": {
+          "type": "long"
+        },
+        "dest_port": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string",
+          "index":"not_analyzed"
+        },
+        "timestamp": {
+          "type": "string",
+          "index":"not_analyzed"
+        }
+      }
+    }
+  }
+}
