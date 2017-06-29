@@ -59,8 +59,29 @@ public class KMeansClustering {
         Option nbOfIterations = OptionBuilder.create("nbIterations");
         options.addOption(nbOfIterations);
 
+        String inputPathMsg = "Training Dataset File Path";
+        OptionBuilder.withArgName("inputPath");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(inputPathMsg);
+        OptionBuilder.isRequired(true);
+        Option inputPath = OptionBuilder.create("inputPath");
+        options.addOption(inputPath);
+        // Exemple : --inputPath "hdfs://sandbox.hortonworks.com:8020/user/hurence/flows.txt"
+        // Example : --inputPath "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\resources\\light_capture_100000.txt"
+
+        String outputPathMsg = "Saved Model File Path";
+        OptionBuilder.withArgName("outputPath");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(outputPathMsg);
+        OptionBuilder.isRequired(true);
+        Option outputPath = OptionBuilder.create("outputPath");
+        options.addOption(outputPath);
+        // Example : --outputPath "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\target\\savedModels"
+
         int nbClusters = 8;
         int nbIterations = 20;
+        String inputPathFile = "";
+        String outputPathFile = "";
 
         try {
             // parse the command line arguments
@@ -72,13 +93,24 @@ public class KMeansClustering {
             if(!line.getOptionValue("nbIterations").isEmpty()) {
                 nbIterations = Integer.parseInt(line.getOptionValue("nbIterations"));
             }
-
+            if(!line.getOptionValue("inputPath").isEmpty()) {
+                inputPathFile = line.getOptionValue("inputPath");
+            }
+            if(!line.getOptionValue("outputPath").isEmpty()) {
+                outputPathFile = line.getOptionValue("outputPath");
+            }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
         }
+
+        long timeInMillis = System.currentTimeMillis();
+        outputPathFile += "_" + timeInMillis;
 
         System.out.println("Nb of clusters = " + nbClusters);
         System.out.println("Nb of iterations = " + nbIterations);
-
+        System.out.println("Training Dataset File Path = " + inputPathFile);
+        System.out.println("Output Model File Path = " + outputPathFile);
 
 
         // Initialize Spark configuration & context
@@ -87,9 +119,7 @@ public class KMeansClustering {
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
         // Read data file from file system and return it as RDD of strings:
-        //String path = "hdfs://sandbox.hortonworks.com:8020/user/hurence/flows.txt";
-        String path = "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\resources\\light_capture_100000.txt";
-        JavaRDD<String> linesRDD = sc.textFile(path);
+        JavaRDD<String> linesRDD = sc.textFile(inputPathFile);
 
         // Split Text Processor :
         Processor splitTextProcessor = new SplitText();
@@ -205,7 +235,10 @@ public class KMeansClustering {
         // Cluster the data into two classes using KMeans k:$nbClusters, nbIterations:$nbIterations
         KMeansModel clusters = KMeans.train(scaledTraces.map(x -> x._2).rdd(), nbClusters, nbIterations);
 
-        clusters.save(sc.sc(), "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\resources\\clusters");
+        // Display cluster centers :
+        displayClustersCenters(clusters);
+
+        clusters.save(sc.sc(), outputPathFile);
 
         // Evaluate clustering by computing Within Set Sum of Squared Errors
         double WSSSE = clusters.computeCost(scaledTraces.map(x -> x._2).rdd());
@@ -213,20 +246,27 @@ public class KMeansClustering {
         // Assign traces to clusters
         JavaRDD<Tuple2<String, Integer>> centroids = scaledTraces.map(t -> new Tuple2<>(t._1, clusters.predict(t._2)));
 
-        // Display cluster centers
+        // Check model persistence :
+        KMeansModel loadedClusters = KMeansModel.load(sc.sc(), outputPathFile);
+        System.out.println("Centroïds loaded from persisted model file :");
+        displayClustersCenters(loadedClusters);
+
+
+    }
+
+    private static void displayClustersCenters(KMeansModel clusters)
+    {
         Vector[] clusterCenters = clusters.clusterCenters();
         for (int i = 0; i < clusterCenters.length; i++) {
             Vector clusterCenter = clusterCenters[i];
             double[] centerPoint = clusterCenter.toArray();
             System.out.println("Cluster Center " + i + ": [ " +
-                      "'Average uploaded bytes': " + centerPoint[0] +
+                    "'Average uploaded bytes': " + centerPoint[0] +
                     ", 'Average downloaded bytes': " + centerPoint[1] +
                     ", 'Average time between two flows': " + centerPoint[2] +
                     ", 'Most Significant Frequency': " + centerPoint[3] +
                     " ]");
         }
-
-        // TODO : transform into dataframe : .toDF("id", "centroid")
-        // TODO : save into file and / or display in console
     }
+
 }
