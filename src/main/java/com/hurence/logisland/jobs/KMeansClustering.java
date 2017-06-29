@@ -1,14 +1,15 @@
 package com.hurence.logisland.jobs;
 
-
 import com.hurence.botsearch.analytics.NetworkTrace;
 import com.hurence.logisland.botsearch.HttpFlow;
 import com.hurence.logisland.botsearch.Trace;
 import com.hurence.logisland.processor.Processor;
 import com.hurence.logisland.processor.SplitText;
 import com.hurence.logisland.processor.StandardProcessContext;
+import com.hurence.logisland.processor.UpdateBiNetflowDate;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.RecordUtils;
+import org.apache.commons.cli.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -33,21 +34,102 @@ public class KMeansClustering {
 
     public static void main(String[] args) {
 
-        String appName = "KMeansClustering";
+        // Command line management :
+
+        Parser parser = new GnuParser();
+        Options options = new Options();
+
+        String helpMsg = "Print this message.";
+        Option help = new Option("help", helpMsg);
+        options.addOption(help);
+
+        String nbOfClustersMsg = "Number of clusters";
+        OptionBuilder.withArgName("nbClusters");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(nbOfClustersMsg);
+        OptionBuilder.isRequired(true);
+        Option nbOfClusters = OptionBuilder.create("nbClusters");
+        options.addOption(nbOfClusters);
+
+        String nbOfIterationsMsg = "Number of iterations";
+        OptionBuilder.withArgName("nbIterations");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(nbOfIterationsMsg);
+        OptionBuilder.isRequired(true);
+        Option nbOfIterations = OptionBuilder.create("nbIterations");
+        options.addOption(nbOfIterations);
+
+        String inputPathMsg = "Training Dataset File Path";
+        OptionBuilder.withArgName("inputPath");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(inputPathMsg);
+        OptionBuilder.isRequired(true);
+        Option inputPath = OptionBuilder.create("inputPath");
+        options.addOption(inputPath);
+        // Exemple : --inputPath "hdfs://sandbox.hortonworks.com:8020/user/hurence/flows.txt"
+        // Example : --inputPath "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\resources\\light_capture_100000.txt"
+
+        String outputPathMsg = "Saved Model File Path";
+        OptionBuilder.withArgName("outputPath");
+        OptionBuilder.hasArg();
+        OptionBuilder.withDescription(outputPathMsg);
+        OptionBuilder.isRequired(true);
+        Option outputPath = OptionBuilder.create("outputPath");
+        options.addOption(outputPath);
+        // Example : --outputPath "file:///D:\\perso\\Developpement\\logisland-flow-analytics-ml-jobs\\target\\savedModels"
+
+        int nbClusters = 8;
+        int nbIterations = 20;
+        String inputPathFile = "";
+        String outputPathFile = "";
+
+        try {
+            // parse the command line arguments
+            CommandLine line = parser.parse(options, args);
+
+            if(!line.getOptionValue("nbClusters").isEmpty()) {
+                nbClusters = Integer.parseInt(line.getOptionValue("nbClusters"));
+            }
+            if(!line.getOptionValue("nbIterations").isEmpty()) {
+                nbIterations = Integer.parseInt(line.getOptionValue("nbIterations"));
+            }
+            if(!line.getOptionValue("inputPath").isEmpty()) {
+                inputPathFile = line.getOptionValue("inputPath");
+            }
+            if(!line.getOptionValue("outputPath").isEmpty()) {
+                outputPathFile = line.getOptionValue("outputPath");
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.exit(1);
+        }
+
+        long timeInMillis = System.currentTimeMillis();
+        outputPathFile += "_" + timeInMillis;
+
+        System.out.println("Nb of clusters = " + nbClusters);
+        System.out.println("Nb of iterations = " + nbIterations);
+        System.out.println("Training Dataset File Path = " + inputPathFile);
+        System.out.println("Output Model File Path = " + outputPathFile);
+
 
         // Initialize Spark configuration & context
+        String appName = "KMeansClustering";
         SparkConf sparkConf = new SparkConf().setAppName(appName).setMaster("local[1]").set("spark.executor.memory", "512m");
-
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
-        // Read data file from Hadoop file system.
-        String path = "hdfs://sandbox.hortonworks.com:8020/user/hurence/flows.txt";
+        // Read data file from file system and return it as RDD of strings:
+        JavaRDD<String> linesRDD = sc.textFile(inputPathFile);
 
-        // Read the data file and return it as RDD of strings
-        JavaRDD<String> linesRDD = sc.textFile(path);
-
+        // Split Text Processor :
         Processor splitTextProcessor = new SplitText();
-        StandardProcessContext context = new StandardProcessContext(splitTextProcessor, "dummy");
+        StandardProcessContext splitTextContext = new StandardProcessContext(splitTextProcessor, "splitTextProcessor");
+        splitTextContext.setProperty("value.fields", "timestamp,duration,protocol,src_ip,src_port,direction,dest_ip,dest_port,state,src_tos,dest_tos,packets_out,bytes_out,bytes_in,label");
+        splitTextContext.setProperty("value.regex", "(\\d{4}\\/\\d{2}\\/\\d{2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{0,6}),([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,flow=([^,]+)");
+
+        // BiNetFlow Processor :
+        Processor updateBiNetflowDate = new UpdateBiNetflowDate();
+        StandardProcessContext updateBiNetflowDateContext = new StandardProcessContext(updateBiNetflowDate, "updateBiNetflowDate");
 
         PairFunction<String, String, Record> mapFunction = new PairFunction<String, String, Record>() {
             public Tuple2<String, Record> call(String line) {
@@ -55,21 +137,23 @@ public class KMeansClustering {
                 Record r = RecordUtils.getKeyValueRecord("", line);
                 List list = new ArrayList<Record>();
                 list.add(r);
-                Collection<Record> records = splitTextProcessor.process(context, list);
+                Collection<Record> tempRecords = splitTextProcessor.process(splitTextContext, list);
+                Collection<Record> records = updateBiNetflowDate.process(updateBiNetflowDateContext, tempRecords);
+
                 Record record = records.iterator().next();
-                String ipSource = record.getField("ip_source").asString();
-                String ipTarget = record.getField("ip_target").asString();
+                String ipSource = record.getField("src_ip").asString();
+                String ipTarget = record.getField("dest_ip").asString();
 
                 return new Tuple2<>(ipSource + "_" + ipTarget, record);
             }
         };
 
         JavaPairRDD<String, Record> flowsRDD = linesRDD.mapToPair(mapFunction);
-        //JavaRDD<Tuple2<String,Record>> flowsRDD = linesRDD.map(mapFunction);
 
+        ///////////////////////////////
+        // Compute traces from flows //
+        ///////////////////////////////
 
-        ////////////////////////////////////////
-        // Compute traces from flows
         JavaRDD<Tuple2<String, NetworkTrace>> traces = flowsRDD.
                 groupByKey()
                 .map(t -> {
@@ -82,11 +166,13 @@ public class KMeansClustering {
 
                         // set up the flows buffer
                         ArrayList<HttpFlow> flows = new ArrayList<HttpFlow>();
-                        flowRecords.forEach(f -> {
+                        flowRecords.forEach(flowRecord -> {
                             HttpFlow flow = new HttpFlow();
-                            flow.setDate(new java.util.Date(f.getField("timestamp").asLong()));
-                            flow.setRequestSize(f.getField("requestSize").asLong());
-                            flow.setResponseSize(f.getField("responseSize").asLong());
+                            flow.setDate(new java.util.Date(flowRecord.getField("record_time").asLong()));
+                            flow.setipSource(flowRecord.getField("src_ip").asString());
+                            flow.setIpTarget(flowRecord.getField("dest_ip").asString());
+                            flow.setRequestSize(flowRecord.getField("bytes_in").asLong());
+                            flow.setResponseSize(flowRecord.getField("bytes_out").asLong());
                             flows.add(flow);
                         });
 
@@ -136,7 +222,6 @@ public class KMeansClustering {
             return new Tuple2<>(t._1, Vectors.dense(values));
         }).cache();
 
-
         // Scale the trace to get mean = 0 and std = 1
         StandardScaler scaler = new StandardScaler(true, true);
 
@@ -146,13 +231,14 @@ public class KMeansClustering {
 
         JavaRDD<Tuple2<String, Vector>> scaledTraces = tracesTuple.map(x -> new Tuple2<>(x._1, scalerModel.transform(x._2)));
 
-
         // TODO add an automated job which compute best parameters
-        // Cluster the data into two classes using KMeans
-        int numClusters = 8;
-        int numIterations = 20;
-        // Cluster the data into two classes using KMeans k:$numClusters, numIterations:$numIterations
-        KMeansModel clusters = KMeans.train(scaledTraces.map(x -> x._2).rdd(), numClusters, numIterations);
+        // Cluster the data into two classes using KMeans k:$nbClusters, nbIterations:$nbIterations
+        KMeansModel clusters = KMeans.train(scaledTraces.map(x -> x._2).rdd(), nbClusters, nbIterations);
+
+        // Display cluster centers :
+        displayClustersCenters(clusters);
+
+        clusters.save(sc.sc(), outputPathFile);
 
         // Evaluate clustering by computing Within Set Sum of Squared Errors
         double WSSSE = clusters.computeCost(scaledTraces.map(x -> x._2).rdd());
@@ -160,7 +246,27 @@ public class KMeansClustering {
         // Assign traces to clusters
         JavaRDD<Tuple2<String, Integer>> centroids = scaledTraces.map(t -> new Tuple2<>(t._1, clusters.predict(t._2)));
 
-        // TODO : transform into dataframe : .toDF("id", "centroid")
-        // TODO : save into file and / or display in console
+        // Check model persistence :
+        KMeansModel loadedClusters = KMeansModel.load(sc.sc(), outputPathFile);
+        System.out.println("Centroïds loaded from persisted model file :");
+        displayClustersCenters(loadedClusters);
+
+
     }
+
+    private static void displayClustersCenters(KMeansModel clusters)
+    {
+        Vector[] clusterCenters = clusters.clusterCenters();
+        for (int i = 0; i < clusterCenters.length; i++) {
+            Vector clusterCenter = clusterCenters[i];
+            double[] centerPoint = clusterCenter.toArray();
+            System.out.println("Cluster Center " + i + ": [ " +
+                    "'Average uploaded bytes': " + centerPoint[0] +
+                    ", 'Average downloaded bytes': " + centerPoint[1] +
+                    ", 'Average time between two flows': " + centerPoint[2] +
+                    ", 'Most Significant Frequency': " + centerPoint[3] +
+                    " ]");
+        }
+    }
+
 }
