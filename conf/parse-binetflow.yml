@@ -10,10 +10,10 @@ documentation: LogIsland analytics main config file. Put here every engine or co
 engine:
   component: com.hurence.logisland.engine.spark.KafkaStreamProcessingEngine
   type: engine
-  documentation: Index some apache logs with logisland
+  documentation: Index some netflow logs with logisland
   configuration:
     spark.app.name: IndexBiNetflowDemo
-    spark.master: yarn-cluster
+    spark.master: local[*]
     spark.driver.memory: 1G
     spark.driver.cores: 1
     spark.executor.memory: 1G
@@ -51,11 +51,11 @@ engine:
         kafka.input.topics.serializer: none
         kafka.output.topics.serializer: com.hurence.logisland.serializer.KryoSerializer
         kafka.error.topics.serializer: com.hurence.logisland.serializer.JsonSerializer
-        kafka.metadata.broker.list: sd-84190:6667,sd-84191:6667,sd-84192:6667,sd-84186:6667
-        kafka.zookeeper.quorum: sd-76387:2181,sd-84186:2181,sd-84189:2181
+        kafka.metadata.broker.list: sandbox:9092
+        kafka.zookeeper.quorum: sandbox:2181
         kafka.topic.autoCreate: true
-        kafka.topic.default.partitions: 20
-        kafka.topic.default.replicationFactor: 3
+        kafka.topic.default.partitions: 8
+        kafka.topic.default.replicationFactor: 1
         kafka.message.key.field: record_id
       processorConfigurations:
 

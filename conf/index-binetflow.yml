@@ -13,11 +13,11 @@ engine:
   documentation: Index some apache logs with logisland
   configuration:
     spark.app.name: IndexBiNetflowDemo
-    spark.master: yarn-cluster
+    spark.master: local[*]
     spark.driver.memory: 1G
     spark.driver.cores: 1
     spark.executor.memory: 1G
-    spark.executor.instances: 5
+    spark.executor.instances: 4
     spark.executor.cores: 2
     spark.yarn.queue: default
     spark.yarn.maxAppAttempts: 4
@@ -41,14 +41,14 @@ engine:
 
   controllerServiceConfigurations:
 
-     - controllerService: elasticsearch_service
-        component: com.hurence.logisland.service.elasticsearch.Elasticsearch_2_4_0_ClientService
-        type: service
-        documentation: elasticsearch 2.4.0 service implementation
-        configuration:
-          hosts: sd-84186:9300,sd-84192:9300,sd-84196:9300,sd-84191:9300,sd-84190:9300
-          cluster.name: elastic-hurence
-          batch.size: 5000
+    - controllerService: elasticsearch_service
+      component: com.hurence.logisland.service.elasticsearch.Elasticsearch_5_4_0_ClientService
+      type: service
+      documentation: elasticsearch 5.4.0 service implementation
+      configuration:
+        hosts: sandbox:9300
+        cluster.name: elasticsearch
+        batch.size: 5000
 
   streamConfigurations:
 
@@ -64,11 +64,11 @@ engine:
         kafka.input.topics.serializer: com.hurence.logisland.serializer.KryoSerializer
         kafka.output.topics.serializer: none
         kafka.error.topics.serializer: com.hurence.logisland.serializer.JsonSerializer
-        kafka.metadata.broker.list: sd-84190:6667,sd-84191:6667,sd-84192:6667,sd-84186:6667
-        kafka.zookeeper.quorum: sd-76387:2181,sd-84186:2181,sd-84189:2181
+        kafka.metadata.broker.list: sandbox:9092
+        kafka.zookeeper.quorum: sandbox:2181
         kafka.topic.autoCreate: true
-        kafka.topic.default.partitions: 20
-        kafka.topic.default.replicationFactor: 3
+        kafka.topic.default.partitions: 8
+        kafka.topic.default.replicationFactor: 1
       processorConfigurations:
 
         - processor: es_publisher

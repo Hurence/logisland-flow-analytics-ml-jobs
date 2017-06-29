@@ -156,3 +156,10 @@ send some records to
 create the index into Elasticsearch
 
     curl -XPUT http://sd-84186.dedibox.fr:9200/ctu-13 -d @logisland-framework/logisland-resources/src/main/resources/conf/ctu-13-mapping.json 
+
+
+
+### init repository
+
+
+    git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git
