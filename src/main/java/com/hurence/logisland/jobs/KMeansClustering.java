@@ -87,16 +87,16 @@ public class KMeansClustering {
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
 
-            if(!line.getOptionValue("nbClusters").isEmpty()) {
+            if (!line.getOptionValue("nbClusters").isEmpty()) {
                 nbClusters = Integer.parseInt(line.getOptionValue("nbClusters"));
             }
-            if(!line.getOptionValue("nbIterations").isEmpty()) {
+            if (!line.getOptionValue("nbIterations").isEmpty()) {
                 nbIterations = Integer.parseInt(line.getOptionValue("nbIterations"));
             }
-            if(!line.getOptionValue("inputPath").isEmpty()) {
+            if (!line.getOptionValue("inputPath").isEmpty()) {
                 inputPathFile = line.getOptionValue("inputPath");
             }
-            if(!line.getOptionValue("outputPath").isEmpty()) {
+            if (!line.getOptionValue("outputPath").isEmpty()) {
                 outputPathFile = line.getOptionValue("outputPath");
             }
         } catch (Exception e) {
@@ -135,16 +135,20 @@ public class KMeansClustering {
             public Tuple2<String, Record> call(String line) {
 
                 Record r = RecordUtils.getKeyValueRecord("", line);
-                List list = new ArrayList<Record>();
+                List<Record> list = new ArrayList<>();
                 list.add(r);
                 Collection<Record> tempRecords = splitTextProcessor.process(splitTextContext, list);
                 Collection<Record> records = updateBiNetflowDate.process(updateBiNetflowDateContext, tempRecords);
 
-                Record record = records.iterator().next();
-                String ipSource = record.getField("src_ip").asString();
-                String ipTarget = record.getField("dest_ip").asString();
+                try {
+                    Record record = records.iterator().next();
+                    String ipSource = record.getField("src_ip").asString();
+                    String ipTarget = record.getField("dest_ip").asString();
 
-                return new Tuple2<>(ipSource + "_" + ipTarget, record);
+                    return new Tuple2<>(ipSource + "_" + ipTarget, record);
+                }catch (Exception ex){
+                    return new Tuple2<>("unknown", null);
+                }
             }
         };
 
@@ -157,15 +161,16 @@ public class KMeansClustering {
         JavaRDD<Tuple2<String, NetworkTrace>> traces = flowsRDD.
                 groupByKey()
                 .map(t -> {
-                    Iterable<Record> flowRecords = t._2;
-                    String[] tokens = t._1.split("_");
                     Trace trace = new Trace();
                     try {
+                        Iterable<Record> flowRecords = t._2;
+                        String[] tokens = t._1.split("_");
+
                         trace.setIpSource(tokens[0]);
                         trace.setIpTarget(tokens[1]);
 
                         // set up the flows buffer
-                        ArrayList<HttpFlow> flows = new ArrayList<HttpFlow>();
+                        ArrayList<HttpFlow> flows = new ArrayList<>();
                         flowRecords.forEach(flowRecord -> {
                             HttpFlow flow = new HttpFlow();
                             flow.setDate(new java.util.Date(flowRecord.getField("record_time").asLong()));
@@ -186,12 +191,12 @@ public class KMeansClustering {
                                 }
                             });
 
-                            flows.forEach(f -> trace.add(f));
+                            flows.forEach(trace::add);
 
                             // compute trace frequencies and stats
                             trace.compute();
                         }
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
 
                     }
 
@@ -254,8 +259,7 @@ public class KMeansClustering {
 
     }
 
-    private static void displayClustersCenters(KMeansModel clusters)
-    {
+    private static void displayClustersCenters(KMeansModel clusters) {
         Vector[] clusterCenters = clusters.clusterCenters();
         for (int i = 0; i < clusterCenters.length; i++) {
             Vector clusterCenter = clusterCenters[i];
