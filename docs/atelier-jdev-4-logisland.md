@@ -630,3 +630,27 @@ enter `Botnet` in the search bar to search only Botnet flows.
 click on some fields to see Quick counts
 
 ![](kibana-filter-botnets.png)
+
+
+
+
+## Network footprint analysis through Machine learning
+
+
+    /usr/local/spark/bin/spark-submit --class com.hurence.logisland.jobs.KMeansClustering --driver-memory 4g  target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar -nbClusters 10 -nbIterations 10 -inputPath /tmp/capture20110810.binetflow -outputPath /tmp/clusters.paruqte
+
+
+    Cluster Center 0: [ 'Average uploaded bytes': -0.004762804352565624, 'Average downloaded bytes': -0.006434461345251199, 'Average time between two flows': 0.1714331420028378, 'Most Significant Frequency': -0.19472068689355237 ]
+    Cluster Center 1: [ 'Average uploaded bytes': 23.847880147671972, 'Average downloaded bytes': 388.6130233752165, 'Average time between two flows': -4.587405304268049, 'Most Significant Frequency': 2.180556475503876 ]
+    Cluster Center 2: [ 'Average uploaded bytes': 633.756107444736, 'Average downloaded bytes': 170.41500459257244, 'Average time between two flows': -1.2520176112615478, 'Most Significant Frequency': 5.488399613909684 ]
+    Cluster Center 3: [ 'Average uploaded bytes': 0.03249432630082737, 'Average downloaded bytes': 0.01976826657423998, 'Average time between two flows': -7.611985863898892, 'Most Significant Frequency': 3.6782110287686467 ]
+    Cluster Center 4: [ 'Average uploaded bytes': 0.04291827526782946, 'Average downloaded bytes': 0.031986211635606186, 'Average time between two flows': -1.070165821772272, 'Most Significant Frequency': 7.682881299532897 ]
+    Cluster Center 5: [ 'Average uploaded bytes': 0.08512160297573648, 'Average downloaded bytes': 0.14225052937437158, 'Average time between two flows': -1.1382353609756743, 'Most Significant Frequency': 3.366819813123287 ]
+    Cluster Center 6: [ 'Average uploaded bytes': 316.2511432025284, 'Average downloaded bytes': 121.52914874544881, 'Average time between two flows': -4.800965640138641, 'Most Significant Frequency': 3.500625104482574 ]
+    Cluster Center 7: [ 'Average uploaded bytes': 9.359717794125272, 'Average downloaded bytes': 101.44540188177837, 'Average time between two flows': -2.918521013590664, 'Most Significant Frequency': 2.663547817590244 ]
+    Cluster Center 8: [ 'Average uploaded bytes': 132.49639037888568, 'Average downloaded bytes': 43.85958413673529, 'Average time between two flows': -4.795757418834234, 'Most Significant Frequency': 4.001404480917403 ]
+    Cluster Center 9: [ 'Average uploaded bytes': 0.012003654687921273, 'Average downloaded bytes': 0.014284479381833907, 'Average time between two flows': -4.12222261451248, 'Most Significant Frequency': 4.311217671762223 ]
+
+
+
+

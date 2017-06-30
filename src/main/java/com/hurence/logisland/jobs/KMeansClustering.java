@@ -14,6 +14,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
@@ -26,13 +27,88 @@ import scala.Tuple2;
 
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
 
+
+
+
+
 public class KMeansClustering {
+
+    public static class ClusteredTrace implements Serializable {
+        private String src_ip;
+        private String dest_ip;
+
+        private double avg_uploaded_bytes;
+        private double avg_downloaded_bytes;
+        private double avg_time_between_two_fLows;
+        private double most_significant_frequency;
+        private long flows_count;
+
+
+        public String getSrc_ip() {
+            return src_ip;
+        }
+
+        public void setSrc_ip(String src_ip) {
+            this.src_ip = src_ip;
+        }
+
+        public String getDest_ip() {
+            return dest_ip;
+        }
+
+        public void setDest_ip(String dest_ip) {
+            this.dest_ip = dest_ip;
+        }
+
+        public double getAvg_uploaded_bytes() {
+            return avg_uploaded_bytes;
+        }
+
+        public void setAvg_uploaded_bytes(double avg_uploaded_bytes) {
+            this.avg_uploaded_bytes = avg_uploaded_bytes;
+        }
+
+        public double getAvg_downloaded_bytes() {
+            return avg_downloaded_bytes;
+        }
+
+        public void setAvg_downloaded_bytes(double avg_downloaded_bytes) {
+            this.avg_downloaded_bytes = avg_downloaded_bytes;
+        }
+
+        public double getAvg_time_between_two_fLows() {
+            return avg_time_between_two_fLows;
+        }
+
+        public void setAvg_time_between_two_fLows(double avg_time_between_two_fLows) {
+            this.avg_time_between_two_fLows = avg_time_between_two_fLows;
+        }
+
+        public double getMost_significant_frequency() {
+            return most_significant_frequency;
+        }
+
+        public void setMost_significant_frequency(double most_significant_frequency) {
+            this.most_significant_frequency = most_significant_frequency;
+        }
+
+        public long getFlows_count() {
+            return flows_count;
+        }
+
+        public void setFlows_count(long flows_count) {
+            this.flows_count = flows_count;
+        }
+    }
+
+
 
     public static void main(String[] args) {
 
@@ -245,13 +321,14 @@ public class KMeansClustering {
         // Display cluster centers :
         displayClustersCenters(clusters);
 
-        clusters.save(sc.sc(), outputPathFile);
+      //  clusters.save(sc.sc(), outputPathFile);
 
         try {
             FileOutputStream out = new FileOutputStream(outputPathFile);
             ObjectOutputStream oos = new ObjectOutputStream(out);
             oos.writeObject(clusters);
             oos.flush();
+            oos.close();
         } catch (Exception e) {
             System.out.println("Problem serializing: " + e);
         }
@@ -263,10 +340,44 @@ public class KMeansClustering {
         // Assign traces to clusters
         JavaRDD<Tuple2<String, Integer>> centroids = scaledTraces.map(t -> new Tuple2<>(t._1, clusters.predict(t._2)));
 
+/*
+*
+*  logger.info(s"assign traces to clusters")
+        val centroids = scaledTraces.map(t => (t._1, clusters.predict(t._2))).toDF("id", "centroid")
+
+        logger.info(s"save traces to parquet")
+        val tmp = traces.map(r => (r._1, r._2.ipSource, r._2.ipTarget,
+            r._2.avgUploadedBytes,
+            r._2.avgDownloadedBytes,
+            r._2.avgTimeBetweenTwoFLows,
+            r._2.mostSignificantFrequency,
+            r._2.flowsCount)).toDF("id",
+            "ip_source",
+            "ip_target",
+            "avg_uploaded_bytes",
+            "avg_downloaded_bytes",
+            "avg_time_between_two_fLows",
+            "most_significant_frequency",
+            "flows_count")
+            .join(centroids, "id")
+            .select("ip_source",
+                "ip_target",
+                "avg_uploaded_bytes",
+                "avg_downloaded_bytes",
+                "avg_time_between_two_fLows",
+                "most_significant_frequency",
+                "flows_count",
+                "centroid")
+
+        tmp.printSchema()
+        tmp.show()
+        tmp.write.save(s"$source/traces.parquet")
+* */
+
         // Check model persistence :
-        KMeansModel loadedClusters = KMeansModel.load(sc.sc(), outputPathFile);
-        System.out.println("Centroïds loaded from persisted model file :");
-        displayClustersCenters(loadedClusters);
+       /* KMeansModel loadedClusters = KMeansModel.load(sc.sc(), outputPathFile);
+        System.out.println("Centroïds loaded from persisted model file :");*/
+        displayClustersCenters(clusters);
 
 
     }
