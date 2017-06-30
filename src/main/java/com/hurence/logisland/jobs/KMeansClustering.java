@@ -24,6 +24,8 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.rdd.RDD;
 import scala.Tuple2;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -244,6 +246,16 @@ public class KMeansClustering {
         displayClustersCenters(clusters);
 
         clusters.save(sc.sc(), outputPathFile);
+
+        try {
+            FileOutputStream out = new FileOutputStream(outputPathFile);
+            ObjectOutputStream oos = new ObjectOutputStream(out);
+            oos.writeObject(clusters);
+            oos.flush();
+        } catch (Exception e) {
+            System.out.println("Problem serializing: " + e);
+        }
+
 
         // Evaluate clustering by computing Within Set Sum of Squared Errors
         double WSSSE = clusters.computeCost(scaledTraces.map(x -> x._2).rdd());
