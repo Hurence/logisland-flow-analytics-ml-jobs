@@ -24,9 +24,6 @@ import com.hurence.logisland.logging.StandardComponentLogger;
 import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
-import com.hurence.logisland.util.time.DateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -48,10 +45,10 @@ public class UpdateBiNetflowDate extends AbstractProcessor {
 
             try {
                 String eventTimeString = outputRecord.getField("timestamp").asString();
-                Date eventDate = sdf.parse(eventTimeString.substring(0, eventTimeString.length() -3));
+                Date eventDate = sdf.parse(eventTimeString.substring(0, eventTimeString.length() - 3));
 
                 if (eventDate != null) {
-                    outputRecord.setField(FieldDictionary.RECORD_TIME, FieldType.LONG, eventDate.getTime() - 60*60*1000);
+                    outputRecord.setField(FieldDictionary.RECORD_TIME, FieldType.LONG, eventDate.getTime() - 60 * 60 * 1000);
                 }
             } catch (Exception e) {
                 String error = "error parsing in record: " + outputRecord + ", " + e.toString();

@@ -6,7 +6,13 @@ Build a continuous big data messaging system with Kafka
 **credits** : Sunil Patil, Software Engineer, JavaWorld | APR 25, 2016 
 
 
-## An introduction
+- An introduction to Kafka tools
+- Quick setup and demo
+- A simple producer/consumer application
+- Use Kafka's partitions, message offsets, and consumer groups to handle up to millions of messages per day
+
+
+## An introduction to Kafka tools
 
 When the big data movement started it was mostly focused on batch processing. Distributed data storage and querying tools like MapReduce, Hive, and Pig were all designed to process data in batches rather than continuously. Businesses would run multiple jobs every night to extract data from a database, then analyze, transform, and eventually store the data. More recently enterprises have discovered the power of analyzing and processing data and events as they happen, not just once every few hours. Most traditional messaging systems don't scale up to handle big data in realtime, however. So engineers at LinkedIn built and open-sourced Kafka: a distributed messaging framework that meets the demands of big data by scaling on commodity hardware.
 

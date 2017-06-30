@@ -1,8 +1,11 @@
-# Introduction to spark
+# An introduction to Big Data analysis with Spark
+
+- Interactive data exploration with SPARK RDD
+- Interactive dataframe analysis with spark shell
+- Package and launch a Spark application
 
 
-
-## Interactive data exploration with SPARK
+## Interactive data exploration with SPARK RDD
 In this sequence, we will use the Spark's interactive shell to explore the [Wikipedia web site traffic](http://dumps.wikimedia.org/other/pagecounts-raw/). 
 
 You will then discover how easy  an exploratory data analysis with Spark (and Scala) can be, in an R (or Python) fashion. You will also see how an intuitive/high-level framework like Spark can drastically improve data mining in a big data context (by distributing all the processing behind the scene and let user manipulates data structures without worrying about their sizes) where relational SQL or even Map/Reduce jobs would definitely suffers from very high latencies. At last I hope you will be impressed by the seamlessly inter-operation between Spark & the Hadoop file system.
@@ -118,6 +121,8 @@ Sometimes (when doing exploratory data analysis over huge datasets), it's really
 	val pagecounts = sc.textFile("/data/pagecount_sm.dat" )
 	val enPages = pagecounts.filter(_.split(" ")(1) == "en").sample(false, 0.01, 12345)
 	enPages.count	
+
+
 
 ## Interactive dataframe analysis with spark shell
 
@@ -342,3 +347,61 @@ raw version
     |meanwhile,|         8|
     |   piper's|         8|
     +----------+----------+
+    
+    
+    
+## Package and launch a Spark application
+
+Ressources management (RAM and CPU cores) in a distributed environment is quite a bit of a challenge. That's why some brand new job schedulers like YARN arise from Hadoop 2 release. With Spark you can use 3 different ways of job scheduling:
+
+1. **Local mode** (*FIFO* job scheduling and *FAIR* scheduling if ressources are available)
+2. **Yarn** (takes the job and runs it as well as possible according to available resources)
+3. **Mesos** (offers resources to clients which can submit jobs if resources are sufficient)
+
+For now we've just used the Spark shell application to run our jobs. That's usefull in a development environment but for production, you'll certainly want to run your jobs simultaneously over the cluster and share efficiently those resources. To do that, we need both a job scheduler and a job.
+
+
+
+
+### Job source file
+Now it's time to define the content of the job in the file `src/main/scala/SimpleApp.scala`. Please note the `SparkConf` definition section where you set up how much memory will be used by each executor, how many cpu core shall be used and the kind of scheduling you want to use (FIFO or FAIR).
+
+    package com.hurence.logisland.job
+    
+    import org.apache.spark.SparkContext
+    import org.apache.spark.SparkConf
+    
+    object SimpleApp {
+        def main(args: Array[String]) {
+    
+            // job configuration
+            val conf = new SparkConf().setAppName("Simple App")
+            val sc = new SparkContext(conf)
+    
+            // job definition
+            var file = "/tmp/pagecount_sm.dat"
+            val pagecounts = sc.textFile( file )
+            val enPages = pagecounts.filter(_.split(" ")(1) == "en")
+            val enPageCount = enPages.count
+            println("Page count for EN pages: %s".format(enPageCount))
+    
+        }
+    }
+
+### Run & build that job
+We first need to compile and package the source files and dependencies
+
+	mvn compile assembly:single
+
+And then we can run the job from multiples threads with 
+
+	/usr/local/spark/bin/spark-submit --class com.hurence.logisland.job.SimpleApp \
+  		target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar 
+
+Let's have a look to [http://HOST_IP:8080](http://HOST_IP:8080) cluster web ui to get details about the differents jobs running along the cluster. The `Simple App counts the lines of French pages access in `/data/pagecount_sm.dat` file.
+
+	...
+
+	Page count for FR pages: 7926641
+	14/05/05 15:48:02 INFO ConnectionManager: Selector thread was interrupted!
+	[success] Total time: 49 s, completed May 5, 2014 3:48:02 PM

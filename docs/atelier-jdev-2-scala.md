@@ -1,4 +1,4 @@
-# Scala Basics
+# Functional programming with Scala
 
 credits: http://www.dhgarrette.com/nlpclass/scala/basics.html
 

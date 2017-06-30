@@ -33,7 +33,7 @@
           "ignore_malformed": true
         },
         "src_port": {
-          "type": "string"
+          "type": "int"
         },
         "record_id": {
           "type": "string"
@@ -65,7 +65,7 @@
           "type": "long"
         },
         "dest_port": {
-          "type": "string"
+          "type": "int"
         },
         "direction": {
           "type": "string",
