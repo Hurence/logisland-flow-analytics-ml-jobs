@@ -23,7 +23,7 @@ Kafka acts a the distributed message queue middleware while Spark is the core of
 LogIsland glue those technologies to simplify log complex event processing at scale.
 
 
-![](logisland-architecture.png)
+![](logIsland-architecture.png)
 
 
 ### Goals
