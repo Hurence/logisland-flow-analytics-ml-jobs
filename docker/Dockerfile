@@ -13,7 +13,8 @@ ENV PATH /usr/local/apache-maven-3.5.0/bin:$PATH
 RUN yum install -y java-1.8.0-openjdk-devel
 
 # build jdev
-RUN cd /usr/local;  git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git;
+RUN cd /usr/local;  \
+    git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git;
 RUN    cd /usr/local/logisland-flow-analytics-ml-jobs; mvn compile assembly:single; mvn install
 RUN cp /usr/local/logisland-flow-analytics-ml-jobs/target/logisland-flow-analytics-ml-jobs-0.10.1.jar  /usr/local/logisland/lib
 
@@ -24,12 +25,14 @@ RUN cd /tmp; \
     wget https://github.com/Hurence/logisland-flow-analytics-ml-jobs/releases/download/v0.1/capture20110810.binetflow.tgz; \
     tar xzf capture20110810.binetflow.tgz; \
     rm -f capture20110810.binetflow.tgz
-#RUN cd /tmp; \
-#    wegt https://github.com/Hurence/logisland-flow-analytics-ml-jobs/releases/download/v0.1/pagecount_sm.dat.tgz \
-#    tar xzf pagecount_sm.dat; \
-#    rm -f pagecount_sm.dat.tgz
+RUN cd /tmp; \
+    wget https://github.com/Hurence/logisland-flow-analytics-ml-jobs/releases/download/v0.1/pagecount_sm.dat.tgz; \
+    tar xzf pagecount_sm.dat.tgz; \
+    rm -f pagecount_sm.dat.tgz
 
 
+RUN    cd /usr/local/logisland-flow-analytics-ml-jobs; mvn compile assembly:single
+COPY html /usr/local/logisland/_site
 
 # update boot script
 COPY bootstrap.sh /etc/bootstrap.sh

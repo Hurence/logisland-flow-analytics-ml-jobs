@@ -12,7 +12,7 @@ engine:
   type: engine
   documentation: Index some netflow logs with logisland
   configuration:
-    spark.app.name: IndexBiNetflowDemo
+    spark.app.name: ParseBiNetflowDemo
     spark.master: local[*]
     spark.driver.memory: 1G
     spark.driver.cores: 1
