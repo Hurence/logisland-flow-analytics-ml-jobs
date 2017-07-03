@@ -13,8 +13,7 @@ ENV PATH /usr/local/apache-maven-3.5.0/bin:$PATH
 RUN yum install -y java-1.8.0-openjdk-devel
 
 # build jdev
-RUN cd /usr/local; \
-    git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git;
+RUN cd /usr/local;  git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git;
 RUN    cd /usr/local/logisland-flow-analytics-ml-jobs; mvn compile assembly:single
 RUN cp /usr/local/logisland-flow-analytics-ml-jobs/target/logisland-flow-analytics-ml-jobs-0.10.1.jar /usr/local/logisland/lib
 
