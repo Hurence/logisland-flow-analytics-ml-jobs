@@ -361,11 +361,13 @@ public class KMeansClustering {
                         .setStringField("search_index", "ctu-13")
                         .setId(traceId)
                         .setField("centroid_id", FieldType.INT, centroidId)
+                        .setField("src_ip", FieldType.FLOAT, trace.ipSource())
+                        .setField("dest_ip", FieldType.FLOAT, trace.ipTarget())
                         .setField("avg_uploaded_bytes", FieldType.FLOAT, trace.avgUploadedBytes())
                         .setField("avg_downloaded_bytes", FieldType.FLOAT, trace.avgDownloadedBytes())
                         .setField("avg_time_between_two_fLows", FieldType.FLOAT, trace.avgTimeBetweenTwoFLows())
                         .setField("most_significant_frequency", FieldType.FLOAT, trace.mostSignificantFrequency())
-                        .setField("flows_count", FieldType.FLOAT, trace.flowsCount());
+                        .setField("flows_count", FieldType.LONG, trace.flowsCount());
 
                 RecordSerializer serializer = new KryoSerializer(true);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
