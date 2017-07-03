@@ -347,7 +347,7 @@ public class KMeansClustering {
             Properties configProperties = new Properties();
             configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "sandbox:9092");
             configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
-            configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+            configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
 
             Producer producer = new KafkaProducer(configProperties);
             it.forEachRemaining( t -> {
@@ -371,7 +371,7 @@ public class KMeansClustering {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 serializer.serialize(baos, record);
 
-                ProducerRecord<byte[], byte[]> rec = new ProducerRecord<>("binetflow_events", baos.toByteArray());
+                ProducerRecord<byte[], byte[]> rec = new ProducerRecord<>("binetflow_events", traceId.getBytes(), baos.toByteArray());
                 producer.send(rec);
                 try {
                     baos.close();
