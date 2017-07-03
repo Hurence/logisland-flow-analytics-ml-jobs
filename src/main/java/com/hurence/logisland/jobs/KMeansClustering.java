@@ -7,14 +7,21 @@ import com.hurence.logisland.processor.Processor;
 import com.hurence.logisland.processor.SplitText;
 import com.hurence.logisland.processor.StandardProcessContext;
 import com.hurence.logisland.processor.UpdateBiNetflowDate;
+import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.RecordUtils;
+import com.hurence.logisland.record.StandardRecord;
+import com.hurence.logisland.serializer.KryoSerializer;
+import com.hurence.logisland.serializer.RecordSerializer;
 import org.apache.commons.cli.*;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
@@ -25,17 +32,8 @@ import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.rdd.RDD;
 import scala.Tuple2;
 
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-
-
-
-
+import java.io.*;
+import java.util.*;
 
 
 public class KMeansClustering {
@@ -107,7 +105,6 @@ public class KMeansClustering {
             this.flows_count = flows_count;
         }
     }
-
 
 
     public static void main(String[] args) {
@@ -193,7 +190,10 @@ public class KMeansClustering {
 
         // Initialize Spark configuration & context
         String appName = "KMeansClustering";
-        SparkConf sparkConf = new SparkConf().setAppName(appName).setMaster("local[1]").set("spark.executor.memory", "512m");
+        SparkConf sparkConf = new SparkConf()
+                .setAppName(appName)
+                .setMaster("local[*]")
+                .set("spark.executor.memory", "3g");
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
         // Read data file from file system and return it as RDD of strings:
@@ -224,7 +224,7 @@ public class KMeansClustering {
                     String ipTarget = record.getField("dest_ip").asString();
 
                     return new Tuple2<>(ipSource + "_" + ipTarget, record);
-                }catch (Exception ex){
+                } catch (Exception ex) {
                     return new Tuple2<>("unknown", null);
                 }
             }
@@ -236,7 +236,7 @@ public class KMeansClustering {
         // Compute traces from flows //
         ///////////////////////////////
 
-        JavaRDD<Tuple2<String, NetworkTrace>> traces = flowsRDD.
+        JavaPairRDD<String, NetworkTrace> traces = flowsRDD.
                 groupByKey()
                 .map(t -> {
                     Trace trace = new Trace();
@@ -280,7 +280,7 @@ public class KMeansClustering {
 
                     return trace;
                 })
-                .map(trace -> new Tuple2<String, NetworkTrace>(trace.getIpSource() + "_" + trace.getIpTarget()
+                .mapToPair(trace -> new Tuple2<String, NetworkTrace>(trace.getIpSource() + "_" + trace.getIpTarget()
                         , new NetworkTrace(
                         trace.getIpSource(),
                         trace.getIpTarget(),
@@ -321,8 +321,6 @@ public class KMeansClustering {
         // Display cluster centers :
         displayClustersCenters(clusters);
 
-      //  clusters.save(sc.sc(), outputPathFile);
-
         try {
             FileOutputStream out = new FileOutputStream(outputPathFile);
             ObjectOutputStream oos = new ObjectOutputStream(out);
@@ -338,49 +336,58 @@ public class KMeansClustering {
         double WSSSE = clusters.computeCost(scaledTraces.map(x -> x._2).rdd());
 
         // Assign traces to clusters
-        JavaRDD<Tuple2<String, Integer>> centroids = scaledTraces.map(t -> new Tuple2<>(t._1, clusters.predict(t._2)));
+        JavaPairRDD<String, Integer> centroids = scaledTraces.mapToPair(t -> new Tuple2<>(t._1, clusters.predict(t._2)));
 
-/*
-*
-*  logger.info(s"assign traces to clusters")
-        val centroids = scaledTraces.map(t => (t._1, clusters.predict(t._2))).toDF("id", "centroid")
 
-        logger.info(s"save traces to parquet")
-        val tmp = traces.map(r => (r._1, r._2.ipSource, r._2.ipTarget,
-            r._2.avgUploadedBytes,
-            r._2.avgDownloadedBytes,
-            r._2.avgTimeBetweenTwoFLows,
-            r._2.mostSignificantFrequency,
-            r._2.flowsCount)).toDF("id",
-            "ip_source",
-            "ip_target",
-            "avg_uploaded_bytes",
-            "avg_downloaded_bytes",
-            "avg_time_between_two_fLows",
-            "most_significant_frequency",
-            "flows_count")
-            .join(centroids, "id")
-            .select("ip_source",
-                "ip_target",
-                "avg_uploaded_bytes",
-                "avg_downloaded_bytes",
-                "avg_time_between_two_fLows",
-                "most_significant_frequency",
-                "flows_count",
-                "centroid")
+        // Assign centroidId to traces
+        centroids.join(traces, 8).foreachPartition(it -> {
 
-        tmp.printSchema()
-        tmp.show()
-        tmp.write.save(s"$source/traces.parquet")
-* */
+            //Configure the Producer
+            Properties configProperties = new Properties();
+            configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "sandbox:9092");
+            configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.ByteArraySerializer");
+            configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 
-        // Check model persistence :
-       /* KMeansModel loadedClusters = KMeansModel.load(sc.sc(), outputPathFile);
-        System.out.println("Centroïds loaded from persisted model file :");*/
-        displayClustersCenters(clusters);
+            Producer producer = new KafkaProducer(configProperties);
+            it.forEachRemaining( t -> {
+
+                String traceId = t._1();
+                int centroidId = t._2()._1();
+                NetworkTrace trace = t._2()._2();
+
+
+                Record record = new StandardRecord("botsearch_trace")
+                        .setStringField("search_index", "ctu-13")
+                        .setId(traceId)
+                        .setField("centroid_id", FieldType.INT, centroidId)
+                        .setField("avg_uploaded_bytes", FieldType.FLOAT, trace.avgUploadedBytes())
+                        .setField("avg_downloaded_bytes", FieldType.FLOAT, trace.avgDownloadedBytes())
+                        .setField("avg_time_between_two_fLows", FieldType.FLOAT, trace.avgTimeBetweenTwoFLows())
+                        .setField("most_significant_frequency", FieldType.FLOAT, trace.mostSignificantFrequency())
+                        .setField("flows_count", FieldType.FLOAT, trace.flowsCount());
+
+                RecordSerializer serializer = new KryoSerializer(true);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                serializer.serialize(baos, record);
+
+                ProducerRecord<byte[], byte[]> rec = new ProducerRecord<>("binetflow_events", baos.toByteArray());
+                producer.send(rec);
+                try {
+                    baos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            producer.close();
+
+        });
+
+
 
 
     }
+
+
 
     private static void displayClustersCenters(KMeansModel clusters) {
         Vector[] clusterCenters = clusters.clusterCenters();
