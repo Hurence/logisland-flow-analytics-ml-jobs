@@ -479,7 +479,7 @@ We're ready to run and test the current iteration of our producer/consumer appli
 
 1. Compile and create a fat JAR by invoking: 
 
-        mvn compile assembly:single.
+        mvn compile assembly:single
 
 2. Create a topic named part-demo with three partitions and one replication factor:
 
