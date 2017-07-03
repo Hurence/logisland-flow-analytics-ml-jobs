@@ -290,7 +290,8 @@ public class KMeansClustering {
                         (float) trace.getMostSignificantFrequency(),
                         trace.getFlows().size(),
                         "",
-                        0)));
+                        0)))
+                .cache();
 
         // Save flows to parquet
         //flowsRDD. toDF().write.save(s"$source/flows.parquet")
