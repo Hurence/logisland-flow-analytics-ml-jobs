@@ -15,7 +15,10 @@ RUN yum install -y java-1.8.0-openjdk-devel
 # build jdev
 RUN cd /usr/local;  \
     git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git;
-RUN    cd /usr/local/logisland-flow-analytics-ml-jobs; mvn compile assembly:single; mvn install
+RUN  cd /usr/local/logisland-flow-analytics-ml-jobs; \
+     MAVEN_OPTS="-Xms512m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m"; \
+     mvn compile assembly:single; \
+     mvn install
 RUN cp /usr/local/logisland-flow-analytics-ml-jobs/target/logisland-flow-analytics-ml-jobs-0.10.1.jar  /usr/local/logisland/lib
 
 
@@ -31,7 +34,7 @@ RUN cd /tmp; \
     rm -f pagecount_sm.dat.tgz
 
 
-RUN    cd /usr/local/logisland-flow-analytics-ml-jobs; mvn compile assembly:single
+#RUN    cd /usr/local/logisland-flow-analytics-ml-jobs; mvn compile assembly:single
 COPY html /usr/local/logisland/_site
 
 # update boot script
