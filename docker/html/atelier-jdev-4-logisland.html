@@ -1,0 +1,1156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>4. Botnet traces mining with logisland &mdash; Logisland - JDev 2017 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Logisland - JDev 2017 1.0 documentation" href="index.html" />
+    <link rel="prev" title="3. An introduction to Big Data analysis with Spark" href="atelier-jdev-3-spark.html" />
+  
+   
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="atelier-jdev-3-spark.html" title="3. An introduction to Big Data analysis with Spark"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Logisland - JDev 2017 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+        <a href="
+    index.html" class="text-logo">Logisland - JDev 2017</a>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-1-kafka.html">1. Big data messaging with Kafka</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-2-scala.html">2. Functional programming with Scala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-3-spark.html">3. An introduction to Big Data analysis with Spark</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">4. Botnet traces mining with logisland</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction-to-logisland">Introduction to Logisland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-malware-capture-facility-project">The Malware Capture Facility Project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analyse-ctu-13-birectionnal-netflows-with-logisland">Analyse CTU-13 birectionnal netflows with logisland</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#network-footprint-analysis-through-machine-learning">Network footprint analysis through Machine learning</a></li>
+</ul>
+</li>
+</ul>
+
+    
+  </div>
+</div>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>4. Botnet traces mining with logisland</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="botnet-traces-mining-with-logisland">
+<h1>4. Botnet traces mining with logisland<a class="headerlink" href="#botnet-traces-mining-with-logisland" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Introduction to Logisland</li>
+<li>The Malware Capture Facility Project</li>
+<li>Analyse CTU-13 birectionnal netflows with logisland</li>
+</ul>
+<div class="section" id="introduction-to-logisland">
+<h2>Introduction to Logisland<a class="headerlink" href="#introduction-to-logisland" title="Permalink to this headline">¶</a></h2>
+<p>LogIsland is an event processing framework based on Kafka and Spark. The
+main goal of this Open Source platform is to abstract the level of
+complexity of complex event processing at scale. Of course many people
+start with an ELK stack, which is really great but not enough to
+elaborate a really complete system monitoring tool. So with LogIsland,
+you&#8217;ll move the log processing burden to a powerful distributed stack.</p>
+<div class="section" id="architecture">
+<h3>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h3>
+<p>Kafka acts a the distributed message queue middleware while Spark is the
+core of the distributed processing. LogIsland glue those technologies to
+simplify log complex event processing at scale.</p>
+<div class="figure">
+<img alt="" src="_images/logIsland-architecture.png" />
+</div>
+</div>
+<div class="section" id="goals">
+<h3>Goals<a class="headerlink" href="#goals" title="Permalink to this headline">¶</a></h3>
+<p>The main goal of LogIsland framework is to provide tools to
+automatically extract valuable knowledge from historical log data. To do
+so we need two different kind of processing over our technical stack :</p>
+<ol class="arabic simple">
+<li>Grab events from logs</li>
+<li>Perform Event Pattern Mining (EPM)</li>
+</ol>
+<p>What we know about <tt class="docutils literal"><span class="pre">Log</span></tt>/<tt class="docutils literal"><span class="pre">Event</span></tt> properties :</p>
+<ul class="simple">
+<li>they&#8217;re naturally temporal</li>
+<li>they carry a global type (user request, error, operation, system failure...)</li>
+<li>they&#8217;re semi-structured</li>
+<li>they&#8217;re produced by software, so we can deduce some templates from   them</li>
+<li>some of them are correlated</li>
+<li>some of them are frequent (or rare).</li>
+<li>some of them are monotonic.</li>
+<li>some of them are of great interest for system operators</li>
+</ul>
+</div>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<p>LogIsland is an event mining scalable platform designed to handle a high
+throughput of events.</p>
+<p>Here is an example of a typical event mining pipeline.</p>
+<ol class="arabic simple">
+<li>Raw events (sensor data, logs, user click stream, ...) are sent to
+Kafka topics by a NIFI / Logstash / *Beats / Flume / Collectd (or
+whatever) agent</li>
+<li>Raw events are structured in Logisland Records, then processed and
+eventually pushed back to another Kafka topic by a Logisland
+streaming job</li>
+<li>Records are sent to external short living storage (Elasticsearch,
+Solr, Couchbase, ...) for online analytics.</li>
+<li>Records are sent to external long living storage (HBase, HDFS, ...)
+for offline analytics (aggregated reports or ML models).</li>
+<li>Logisland Processors handle Records to produce Alerts and Information
+from ML models</li>
+</ol>
+</div>
+</div>
+<div class="section" id="the-malware-capture-facility-project">
+<h2>The Malware Capture Facility Project<a class="headerlink" href="#the-malware-capture-facility-project" title="Permalink to this headline">¶</a></h2>
+<p>The Malware Capture Facility Project is an effort from the Czech
+Technical University ATG Group for capturing, analyzing and publishing
+real and long-lived malware traffic.</p>
+<p><a class="reference external" href="http://mcfp.weebly.com/analysis">http://mcfp.weebly.com/analysis</a></p>
+<p>The goals of the project are:</p>
+<ul class="simple">
+<li>To execute real malware for long periods of time.</li>
+<li>To analyze the malware traffic manually and automatically.</li>
+<li>To assign ground-truth labels to the traffic, including several
+botnet phases, attacks, normal and background.</li>
+<li>To publish these dataset to the community to help develop better
+detection methods.</li>
+</ul>
+<div class="figure">
+<img alt="" src="_images/security-botnet_architecture.jpg" />
+</div>
+<div class="section" id="topology">
+<h3>TOPOLOGY<a class="headerlink" href="#topology" title="Permalink to this headline">¶</a></h3>
+<p>The topology used in the project was designed to be as simple as
+possible. It uses VirtualBox to execute Windows virtual machines on
+Linux Hosts. The only two restrictions applied to the traffic are a
+bandwidth control to prevent DDoS and a redirection of all the SMTP
+traffic to prevent SPAM sending. More details can be found on the
+Topology page.</p>
+</div>
+<div class="section" id="publishing">
+<h3>PUBLISHING<a class="headerlink" href="#publishing" title="Permalink to this headline">¶</a></h3>
+<p>The complete dataset is published and can be downloaded from the Dataset
+menu. The published files include:</p>
+<ul class="simple">
+<li>The pcap files of the malware traffic.</li>
+<li>The argus binary flow file.</li>
+<li>The text argus flow file.</li>
+<li>The text web logs</li>
+<li>A text file with the explanation of the experiment</li>
+<li>Several related files, such as the histogram of labels.</li>
+</ul>
+</div>
+<div class="section" id="collaboration">
+<h3>COLLABORATION<a class="headerlink" href="#collaboration" title="Permalink to this headline">¶</a></h3>
+<p>If you find this project or the dataset useful please consider
+collaborating with it. Among the things that need more attention are a
+better labeling, more screenshots of the traffic and information about
+which malware it really is. Feel free to send an email to
+<a class="reference external" href="mailto:sebastian&#46;garcia&#37;&#52;&#48;agents&#46;fel&#46;cvut&#46;cz">sebastian<span>&#46;</span>garcia<span>&#64;</span>agents<span>&#46;</span>fel<span>&#46;</span>cvut<span>&#46;</span>cz</a>.</p>
+</div>
+<div class="section" id="botnet-analysis">
+<h3>BOTNET ANALYSIS<a class="headerlink" href="#botnet-analysis" title="Permalink to this headline">¶</a></h3>
+<p>This dataset is directly feeding the CTU efforts for modelling and
+detecting botnets behavior on the network. As such, the Botnet Analysis
+blog page includes some analysis of their behaviors.</p>
+</div>
+<div class="section" id="the-ctu-13-dataset-a-labeled-dataset-with-botnet-normal-and-background-traffic">
+<h3>THE CTU-13 DATASET. A LABELED DATASET WITH BOTNET, NORMAL AND BACKGROUND TRAFFIC.<a class="headerlink" href="#the-ctu-13-dataset-a-labeled-dataset-with-botnet-normal-and-background-traffic" title="Permalink to this headline">¶</a></h3>
+<p>browse all public datasets <a class="reference external" href="https://mcfp.felk.cvut.cz/publicDatasets/">https://mcfp.felk.cvut.cz/publicDatasets/</a></p>
+<p>The CTU-13 is a dataset of botnet traffic that was captured in the CTU
+University, Czech Republic, in 2011. The goal of the dataset was to have
+a large capture of real botnet traffic mixed with normal traffic and
+background traffic. The CTU-13 dataset consists in thirteen captures
+(called scenarios) of different botnet samples. On each scenario we
+executed a specific malware, which used several protocols and performed
+different actions.</p>
+<p>Table 2 shows the characteristics of the botnet scenarios.</p>
+<div class="figure">
+<img alt="" src="_images/145022_orig.jpg" />
+</div>
+<p>Each scenario was captured in a pcap file that contains all the packets
+of the three types of traffic. These pcap files were processed to obtain
+other type of information, such as NetFlows, WebLogs, etc. The first
+analysis of the CTU-13 dataset, that was described and published in the
+paper &#8220;An empirical comparison of botnet detection methods&#8221; (see
+Citation below) used unidirectional NetFlows to represent the traffic
+and to assign the labels. These unidirectional NetFlows should not be
+used because they were outperformed by our second analysis of the
+dataset, which used bidirectional NetFlows. The bidirectional NetFlows
+have several advantages over the directional ones. First, they solve the
+issue of differentiating between the client and the server, second they
+include more information and third they include much more detailed
+labels. The second analysis of the dataset with the bidirectional
+NetFlows is the one published here.</p>
+<p>The relationship between the duration of the scenario, the number of
+packets, the number of NetFlows and the size of the pcap file is shown
+in Table 3. This Table also shows the malware used to create the
+capture, and the number of infected computers on each scenario.</p>
+<p>Table 3. Amount of data on each botnet scenario</p>
+<div class="figure">
+<img alt="" src="_images/6977136.jpg" />
+</div>
+<p>The distinctive characteristic of the CTU-13 dataset is that we manually
+analyzed and label each scenario. The labeling process was done inside
+the NetFlows files. Table 4 shows the relationship between the number of
+labels for the Background, Botnet, C&amp;C Channels and Normal on each
+scenario.</p>
+<p>!(Table 4. Distribution of labels in the NetFlows for each scenario in
+the dataset. <img alt="image0" src="_images/7883961.jpg" /></p>
+</div>
+<div class="section" id="ctu-malware-capture-botnet-42-or-scenario-1-in-the-ctu-13-dataset">
+<h3>CTU-Malware-Capture-Botnet-42 or Scenario 1 in the CTU-13 dataset.<a class="headerlink" href="#ctu-malware-capture-botnet-42-or-scenario-1-in-the-ctu-13-dataset" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="description">
+<h4>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>Probable Name: Neris</li>
+<li>MD5: bf08e6b02e00d2bc6dd493e93e69872f</li>
+<li>SHA1: 5c2ba68d78471ff02adcdab12b2f82db8efe2104</li>
+<li>SHA256:
+527da5fd4e501765cdd1bccb2f7c5ac76c0b22dfaf7c24e914df4e1cb8029d71</li>
+<li>Password of zip file: infected</li>
+<li>Duration: 6.15 hours</li>
+<li>Complete Pcap size: 52GB</li>
+<li>Botnet Pcap size: 56MB</li>
+<li>NetFlow size: 1GB</li>
+<li>VirusTotal</li>
+<li>HybridAnalysis</li>
+</ul>
+</div>
+<div class="section" id="get-the-files">
+<h4>Get the files<a class="headerlink" href="#get-the-files" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-python"><div class="highlight"><pre>wget https://mcfp.felk.cvut.cz/publicDatasets/CTU-Malware-Capture-Botnet-42/detailed-bidirectional-flow-labels/capture20110810.binetflow
+</pre></div>
+</div>
+</div>
+<div class="section" id="ip-addresses">
+<h4>IP Addresses<a class="headerlink" href="#ip-addresses" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>Infected hosts<ul>
+<li>147.32.84.165: Windows XP (English version) Name: SARUMAN (Label:
+Botnet) (amount of bidirectional flows: 40961)</li>
+</ul>
+</li>
+<li>Normal hosts:<ul>
+<li>147.32.84.170 (amount of bidirectional flows: 18438, Label:
+Normal-V42-Stribrek)</li>
+<li>147.32.84.164 (amount of bidirectional flows: 7654, Label:
+Normal-V42-Grill)</li>
+<li>147.32.84.134 (amount of bidirectional flows: 3808, Label:
+Normal-V42-Jist)</li>
+<li>147.32.87.36 (amount of bidirectional flows: 269, Label:
+CVUT-WebServer. This normal host is not so reliable since is a
+webserver)</li>
+<li>147.32.80.9 (amount of bidirectional flows: 83, Label:
+CVUT-DNS-Server. This normal host is not so reliable since is a
+dns server)</li>
+<li>147.32.87.11 (amount of bidirectional flows: 6, Label:
+MatLab-Server. This normal host is not so reliable since is a
+matlab server)</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="important-label-note">
+<h4>Important Label note<a class="headerlink" href="#important-label-note" title="Permalink to this headline">¶</a></h4>
+<p>Please note that the labels of the flows generated by the malware start
+with &#8220;From-Botnet&#8221;. The labels &#8220;To-Botnet&#8221; are flows sent to the botnet
+by unknown computers, so they should not be considered malicious perse.
+Also for the normal computers, the counts are for the labels
+&#8220;From-Normal&#8221;. The labels &#8220;To-Normal&#8221; are flows sent to the botnet by
+unknown computers, so they should not be considered malicious perse.</p>
+</div>
+<div class="section" id="timeline">
+<h4>Timeline<a class="headerlink" href="#timeline" title="Permalink to this headline">¶</a></h4>
+<p>Wed ago 10 15:58:00 CEST 2011</p>
+<p>Today we capture the neris bot along with the packets of the whole CTU
+department. We used an XP virtualbox machine with the 147.32.84.165
+public ip address. The first hour of capture was only background and
+latter we run the malware until 5 minutes before ending. We limited the
+bandwith of the experiment to 20kbps in the output of the bot.</p>
+</div>
+<div class="section" id="traffic-analysis">
+<h4>Traffic Analysis<a class="headerlink" href="#traffic-analysis" title="Permalink to this headline">¶</a></h4>
+<p>The bot sent spam, connected to an HTTP CC, and use HTTP to do some
+ClickFraud.</p>
+</div>
+</div>
+</div>
+<div class="section" id="analyse-ctu-13-birectionnal-netflows-with-logisland">
+<h2>Analyse CTU-13 birectionnal netflows with logisland<a class="headerlink" href="#analyse-ctu-13-birectionnal-netflows-with-logisland" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="start-logisland-as-a-docker-container">
+<h3>Start LogIsland as a Docker container<a class="headerlink" href="#start-logisland-as-a-docker-container" title="Permalink to this headline">¶</a></h3>
+<p>LogIsland is packaged as a Docker container that you can build yourself
+or pull from Docker Hub. The docker container is built from a Centos 6.4
+image with the following tools enabled (among others)</p>
+<ul class="simple">
+<li>Kafka</li>
+<li>Spark</li>
+<li>Elasticsearch</li>
+<li>Kibana</li>
+<li>LogIsland</li>
+</ul>
+<p>Let&#8217;s setup the env by</p>
+<ol class="arabic">
+<li><p class="first">Pull the image from Docker Repository (it may take some time)</p>
+<div class="highlight-python"><div class="highlight"><pre>docker pull hurence/logisland-jdev
+</pre></div>
+</div>
+<p>You should be aware that this Docker container is quite eager in RAM
+and will need at least 8G of memory to run smoothly.</p>
+</li>
+<li><p class="first">Now run the container</p>
+<div class="highlight-python"><div class="highlight"><pre># run container
+docker run \
+    -it \
+    -p 80:80 \
+    -p 8080:8080 \
+    -p 2055:2055 \
+    -p 3000:3000 \
+    -p 9200-9300:9200-9300 \
+    -p 5601:5601 \
+    -p 2181:2181 \
+    -p 9092:9092 \
+    -p 9000:9000 \
+    -p 4050-4060:4050-4060 \
+    --name logisland-jdev \
+    -h sandbox \
+    hurence/logisland-jdev bash
+
+# get container ip
+docker inspect logisland-jdev
+
+# or if your are on mac os
+docker-machine ip default
+</pre></div>
+</div>
+</li>
+<li><p class="first">you should add an entry for <strong>sandbox</strong> (with the container ip) in
+your <tt class="docutils literal"><span class="pre">/etc/hosts</span></tt> as it will be easier to access to all web
+services in logisland running container.</p>
+<blockquote>
+<div><p>If you have your own Spark and Kafka cluster, you can download the
+<a class="reference external" href="https://github.com/Hurence/logisland/releases">latest release</a>
+and unzip on an edge node.</p>
+</div></blockquote>
+</li>
+<li><p class="first">Retrieve one part of the dataset (should be already done in Docker
+image)</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /tmp;
+wget https://github.com/Hurence/logisland-flow-analytics-ml-jobs/releases/download/v0.1/capture20110810.binetflow.tgz;
+tar xzf capture20110810.binetflow.tgz;
+rm -f capture20110810.binetflow.tgz
+</pre></div>
+</div>
+</li>
+<li><p class="first">init repository (should be already done in Docker image)</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /usr/local
+git clone https://github.com/Hurence/logisland-flow-analytics-ml-jobs.git;
+mvn compile assembly:single
+cp target/logisland-flow-analytics-ml-jobs-0.10.1.jar /usr/local/logisland/lib
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="understand-logisland-streaming-job">
+<h3>Understand logisland streaming job<a class="headerlink" href="#understand-logisland-streaming-job" title="Permalink to this headline">¶</a></h3>
+<p>A logisland job define some stream processing pipeline inside a simple
+yaml configuration file.</p>
+<p>The first job can be found in <tt class="docutils literal"><span class="pre">conf/index-binetflow.yml</span></tt> configuration
+file defines a stream processing job for indexing events to
+elasticsearch.</p>
+<p>The first section configures the Spark engine (we will use a
+KafkaStreamProcessingEngine). A few notes about the most important
+parameters :</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">spark.master:</span> <span class="pre">local[*]</span></tt> parameter specifies that we are running
+spark application locally. In a real environment we would set
+<tt class="docutils literal"><span class="pre">spark.master:</span> <span class="pre">yarn-cluster</span></tt> to schedule the processing within
+YARN.</li>
+<li><tt class="docutils literal"><span class="pre">spark.streaming.batchDuration:</span> <span class="pre">10000</span></tt> says that we run the
+processing by 10&#8221; micro-batches.</li>
+<li><tt class="docutils literal"><span class="pre">spark.streaming.kafka.maxRatePerPartition:</span> <span class="pre">3000</span></tt> says that for
+each micro-batch at most 3000 events will be processed by second and
+by partition</li>
+</ul>
+<p>Here is the beginning of the conf file :</p>
+<div class="highlight-python"><div class="highlight"><pre>version: 0.10
+documentation: LogIsland analytics main config file. Put here every engine or component config
+engine:
+  component: com.hurence.logisland.engine.spark.KafkaStreamProcessingEngine
+  type: engine
+  documentation: Index some apache logs with logisland
+  configuration:
+    spark.app.name: IndexBiNetflowDemo
+    spark.master: local[*]
+    spark.driver.memory: 1G
+    spark.driver.cores: 1
+    spark.executor.memory: 1G
+    spark.executor.instances: 4
+    spark.executor.cores: 2
+    spark.task.maxFailures: 8
+    spark.serializer: org.apache.spark.serializer.KryoSerializer
+    spark.streaming.batchDuration: 10000
+    spark.streaming.backpressure.enabled: false
+    spark.streaming.unpersist: false
+    spark.streaming.blockInterval: 500
+    spark.streaming.kafka.maxRatePerPartition: 3000
+    spark.streaming.timeout: -1
+    spark.streaming.unpersist: false
+    spark.streaming.kafka.maxRetries: 30
+    spark.streaming.ui.retainedBatches: 200
+    spark.streaming.receiver.writeAheadLog.enable: false
+    spark.ui.port: 4050
+</pre></div>
+</div>
+<p>the following part of the configuration defines an Elasticsearch service
+that will be used later in the <tt class="docutils literal"><span class="pre">BulkAddElasticsearch</span></tt> processor. We
+define here elasticsearch <tt class="docutils literal"><span class="pre">hosts:</span> <span class="pre">sandbox:9300</span></tt>, the
+<tt class="docutils literal"><span class="pre">cluster.name:</span> <span class="pre">elasticsearch</span></tt> and the <tt class="docutils literal"><span class="pre">batch.size:</span> <span class="pre">5000</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre>controllerServiceConfigurations:
+
+  - controllerService: elasticsearch_service
+    component: com.hurence.logisland.service.elasticsearch.Elasticsearch_5_4_0_ClientService
+    type: service
+    documentation: elasticsearch 5.4.0 service implementation
+    configuration:
+      hosts: sandbox:9300
+      cluster.name: elasticsearch
+      batch.size: 5000
+</pre></div>
+</div>
+<p>The next part defines the stream itself which is made of 3 main topics
+list : one for input records, one for output records and one for errors.
+Each of them having a serialization class. Please note that here
+<tt class="docutils literal"><span class="pre">kafka.input.topics.serializer</span></tt> is set to
+<tt class="docutils literal"><span class="pre">com.hurence.logisland.serializer.KryoSerializer</span></tt> because the input
+topic <tt class="docutils literal"><span class="pre">binetflow_events</span></tt> contains Kryo serialized records that will be
+produced by another job.</p>
+<div class="highlight-python"><div class="highlight"><pre>streamConfigurations:
+
+
+  - stream: indexing_stream
+    component: com.hurence.logisland.stream.spark.KafkaRecordStreamParallelProcessing
+    type: stream
+    documentation: a processor that links
+    configuration:
+      kafka.input.topics: binetflow_events
+      kafka.output.topics: none
+      kafka.error.topics: _errors
+      kafka.input.topics.serializer: com.hurence.logisland.serializer.KryoSerializer
+      kafka.output.topics.serializer: none
+      kafka.error.topics.serializer: com.hurence.logisland.serializer.JsonSerializer
+      kafka.metadata.broker.list: sandbox:9092
+      kafka.zookeeper.quorum: sandbox:2181
+      kafka.topic.autoCreate: true
+      kafka.topic.default.partitions: 8
+      kafka.topic.default.replicationFactor: 1
+</pre></div>
+</div>
+<p>The final part of the strem configuration is the pipeline of
+<tt class="docutils literal"><span class="pre">Processor</span></tt> that will process the incoming <tt class="docutils literal"><span class="pre">Records</span></tt>. Here we simply
+use a <tt class="docutils literal"><span class="pre">BulkAddElasticsearch</span></tt> which will send incoming <tt class="docutils literal"><span class="pre">Records</span></tt> to
+Elasticsearch via the injected <tt class="docutils literal"><span class="pre">elasticsearch.client.service</span></tt>. Note
+that we provide both <tt class="docutils literal"><span class="pre">default.index:</span> <span class="pre">ctu-13</span></tt> and
+<tt class="docutils literal"><span class="pre">default.type:</span> <span class="pre">bi_netflow</span></tt> for elasticsearch documents but these
+settings can be overided by come fields in the <tt class="docutils literal"><span class="pre">Record</span></tt> itself,
+<tt class="docutils literal"><span class="pre">es.index.field:</span> <span class="pre">search_index</span></tt> and <tt class="docutils literal"><span class="pre">es.type.field:</span> <span class="pre">record_type</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre>processorConfigurations:
+
+  - processor: es_publisher
+    component: com.hurence.logisland.processor.elasticsearch.BulkAddElasticsearch
+    type: processor
+    documentation: A processor that pushes Bro events into ES
+    configuration:
+      elasticsearch.client.service: elasticsearch_service
+      default.index: ctu-13
+      default.type: bi_netflow
+      timebased.index: no
+      es.index.field: search_index
+      es.type.field: record_type
+</pre></div>
+</div>
+<p>The second job can be found in <tt class="docutils literal"><span class="pre">conf/parse-binetflow.yml</span></tt>
+configuration file defines a stream processing job to parse incoming
+netflow records.</p>
+<p>After <tt class="docutils literal"><span class="pre">Engine</span></tt> definition the <tt class="docutils literal"><span class="pre">Stream</span></tt> says that <tt class="docutils literal"><span class="pre">Records</span></tt> will be
+read from <tt class="docutils literal"><span class="pre">kafka.input.topics:</span> <span class="pre">binetflow_raw</span></tt>, processed and sent to
+<tt class="docutils literal"><span class="pre">kafka.output.topics:</span> <span class="pre">binetflow_events</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>streamConfigurations:
+
+  - stream: parsing_stream
+    component: com.hurence.logisland.stream.spark.KafkaRecordStreamParallelProcessing
+    type: stream
+    documentation: a processor that links
+    configuration:
+      kafka.input.topics: binetflow_raw
+      kafka.output.topics: binetflow_events
+      kafka.error.topics: _errors
+      kafka.input.topics.serializer: none
+      kafka.output.topics.serializer: com.hurence.logisland.serializer.KryoSerializer
+      kafka.error.topics.serializer: com.hurence.logisland.serializer.JsonSerializer
+      kafka.metadata.broker.list: sandbox:9092
+      kafka.zookeeper.quorum: sandbox:2181
+      kafka.topic.autoCreate: true
+      kafka.topic.default.partitions: 8
+      kafka.topic.default.replicationFactor: 1
+      kafka.message.key.field: record_id
+
+    processorConfigurations:
+</pre></div>
+</div>
+<p>The pipeline of processor will start the processing chain by a
+<tt class="docutils literal"><span class="pre">SplitText</span></tt> regexp processor which one will split all incoming lines
+accordingly to <tt class="docutils literal"><span class="pre">value.regex</span></tt> field, each matching group identified by
+the <tt class="docutils literal"><span class="pre">value.fields</span></tt> parameter, producing the following record from the
+line above
+<tt class="docutils literal"><span class="pre">2011/08/10</span> <span class="pre">15:54:07.366830,0.002618,udp,93.79.39.15,10520,</span>&nbsp; <span class="pre">&lt;-&gt;,147.32.84.229,13363,CON,0,0,2,520,460,flow=Background-UDP-Established</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;@timestamp&quot;</span><span class="p">:</span> <span class="s">&quot;2011-08-10T13:54:07Z&quot;</span><span class="p">,</span>
+    <span class="s">&quot;bytes_in&quot;</span><span class="p">:</span> <span class="mi">460</span><span class="p">,</span>
+    <span class="s">&quot;bytes_out&quot;</span><span class="p">:</span> <span class="mi">520</span><span class="p">,</span>
+    <span class="s">&quot;dest_ip&quot;</span><span class="p">:</span> <span class="s">&quot;147.32.84.229&quot;</span><span class="p">,</span>
+    <span class="s">&quot;dest_port&quot;</span><span class="p">:</span> <span class="s">&quot;13363&quot;</span><span class="p">,</span>
+    <span class="s">&quot;dest_tos&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s">&quot;direction&quot;</span><span class="p">:</span> <span class="s">&quot;  &lt;-&gt;&quot;</span><span class="p">,</span>
+    <span class="s">&quot;duration&quot;</span><span class="p">:</span> <span class="mf">0.002618</span><span class="p">,</span>
+    <span class="s">&quot;label&quot;</span><span class="p">:</span> <span class="s">&quot;Background-UDP-Established&quot;</span><span class="p">,</span>
+    <span class="s">&quot;packets_out&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s">&quot;protocol&quot;</span><span class="p">:</span> <span class="s">&quot;udp&quot;</span><span class="p">,</span>
+    <span class="s">&quot;record_id&quot;</span><span class="p">:</span> <span class="s">&quot;1312984447366-93.79.39.15-147.32.84.229&quot;</span><span class="p">,</span>
+    <span class="s">&quot;record_raw_value&quot;</span><span class="p">:</span> <span class="s">&quot;2011/08/10 15:54:07.366830,0.002618,udp,93.79.39.15,10520,  &lt;-&gt;,147.32.84.229,13363,CON,0,0,2,520,460,flow=Background-UDP-Established&quot;</span><span class="p">,</span>
+    <span class="s">&quot;record_time&quot;</span><span class="p">:</span> <span class="mi">1312984447366</span><span class="p">,</span>
+    <span class="s">&quot;record_type&quot;</span><span class="p">:</span> <span class="s">&quot;bi_netflow&quot;</span><span class="p">,</span>
+    <span class="s">&quot;src_ip&quot;</span><span class="p">:</span> <span class="s">&quot;93.79.39.15&quot;</span><span class="p">,</span>
+    <span class="s">&quot;src_port&quot;</span><span class="p">:</span> <span class="s">&quot;10520&quot;</span><span class="p">,</span>
+    <span class="s">&quot;src_tos&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s">&quot;state&quot;</span><span class="p">:</span> <span class="s">&quot;CON&quot;</span><span class="p">,</span>
+    <span class="s">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s">&quot;2011/08/10 15:54:07.366830&quot;</span>
+  <span class="p">}</span>
+</pre></div>
+</div>
+<p>here is the conf :</p>
+<div class="highlight-python"><div class="highlight"><pre>- processor: bi_netflow_parser
+  component: com.hurence.logisland.processor.SplitText
+  type: parser
+  documentation: a parser that produce events from bi-directionnal netflow logs
+  configuration:
+    record.type: bi_netflow
+    value.regex: (\d{4}\/\d{2}\/\d{2}\s\d{1,2}:\d{1,2}:\d{1,2}\.\d{0,6}),([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,flow=([^,]+)
+    value.fields: timestamp,duration,protocol,src_ip,src_port,direction,dest_ip,dest_port,state,src_tos,dest_tos,packets_out,bytes_out,bytes_in,label
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">as the previous Processor as juste produced text fields we will</div>
+</div>
+<p>convert
+|  them to the desired types with <tt class="docutils literal"><span class="pre">ConvertFieldsType</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>- processor: field_types_converter
+  component: com.hurence.logisland.processor.ConvertFieldsType
+  type: processor
+  documentation: convert some field to a given type
+  configuration:
+    bytes_in: long
+    bytes_out: long
+    packets_out: long
+    duration: float
+    src_tos: int
+    dest_tos: int
+</pre></div>
+</div>
+<p>The date of the Netflow file is converted with a custom Java Processor
+<tt class="docutils literal"><span class="pre">UpdateBiNetflowDate</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>- processor: date_updater
+  component: com.hurence.logisland.processor.UpdateBiNetflowDate
+  type: processor
+  documentation: compute record_time
+</pre></div>
+</div>
+<p>Here is the java code of the date updater. this component is built in an
+external jar module which has to be copied into <tt class="docutils literal"><span class="pre">$LOGISLAND_HOME/lib</span></tt>
+folder</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">package</span> <span class="nn">com.hurence.logisland.processor</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.annotation.documentation.CapabilityDescription</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.annotation.documentation.Tags</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.component.PropertyDescriptor</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.logging.ComponentLog</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.logging.StandardComponentLogger</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.record.FieldDictionary</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.record.FieldType</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.hurence.logisland.record.Record</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.text.SimpleDateFormat</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+
+
+<span class="nd">@Tags</span><span class="o">({</span><span class="s">&quot;record&quot;</span><span class="o">,</span> <span class="s">&quot;fields&quot;</span><span class="o">,</span> <span class="s">&quot;post-process&quot;</span><span class="o">,</span> <span class="s">&quot;binetflow&quot;</span><span class="o">,</span> <span class="s">&quot;date&quot;</span><span class="o">})</span>
+<span class="nd">@CapabilityDescription</span><span class="o">(</span><span class="s">&quot;Post processing step to update a dte field in a custom way&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">UpdateBiNetflowDate</span> <span class="kd">extends</span> <span class="n">AbstractProcessor</span> <span class="o">{</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">ComponentLog</span> <span class="n">logger</span> <span class="o">=</span> <span class="k">new</span> <span class="n">StandardComponentLogger</span><span class="o">(</span><span class="s">&quot;UpdateBiNetflowDate&quot;</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">Record</span><span class="o">&gt;</span> <span class="nf">process</span><span class="o">(</span><span class="n">ProcessContext</span> <span class="n">context</span><span class="o">,</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">Record</span><span class="o">&gt;</span> <span class="n">records</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">SimpleDateFormat</span> <span class="n">sdf</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SimpleDateFormat</span><span class="o">(</span><span class="s">&quot;yyyy/MM/dd HH:mm:ss.S&quot;</span><span class="o">);</span>
+        <span class="n">sdf</span><span class="o">.</span><span class="na">setTimeZone</span><span class="o">(</span><span class="n">TimeZone</span><span class="o">.</span><span class="na">getTimeZone</span><span class="o">(</span><span class="s">&quot;GMT+1&quot;</span><span class="o">));</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">Record</span> <span class="n">outputRecord</span> <span class="o">:</span> <span class="n">records</span><span class="o">)</span> <span class="o">{</span>
+
+
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">String</span> <span class="n">eventTimeString</span> <span class="o">=</span> <span class="n">outputRecord</span><span class="o">.</span><span class="na">getField</span><span class="o">(</span><span class="s">&quot;timestamp&quot;</span><span class="o">).</span><span class="na">asString</span><span class="o">();</span>
+                <span class="n">Date</span> <span class="n">eventDate</span> <span class="o">=</span> <span class="n">sdf</span><span class="o">.</span><span class="na">parse</span><span class="o">(</span><span class="n">eventTimeString</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">eventTimeString</span><span class="o">.</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="mi">3</span><span class="o">));</span>
+
+                <span class="k">if</span> <span class="o">(</span><span class="n">eventDate</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">outputRecord</span><span class="o">.</span><span class="na">setField</span><span class="o">(</span><span class="n">FieldDictionary</span><span class="o">.</span><span class="na">RECORD_TIME</span><span class="o">,</span> <span class="n">FieldType</span><span class="o">.</span><span class="na">LONG</span><span class="o">,</span> <span class="n">eventDate</span><span class="o">.</span><span class="na">getTime</span><span class="o">()</span> <span class="o">-</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">String</span> <span class="n">error</span> <span class="o">=</span> <span class="s">&quot;error parsing in record: &quot;</span> <span class="o">+</span> <span class="n">outputRecord</span> <span class="o">+</span> <span class="s">&quot;, &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+                <span class="n">outputRecord</span><span class="o">.</span><span class="na">addError</span><span class="o">(</span><span class="s">&quot;unable to parse date&quot;</span><span class="o">,</span> <span class="n">logger</span><span class="o">,</span> <span class="n">error</span><span class="o">);</span>
+            <span class="o">}</span>
+
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">records</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">PropertyDescriptor</span><span class="o">&gt;</span> <span class="nf">getSupportedPropertyDescriptors</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">Collections</span><span class="o">.</span><span class="na">emptyList</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Lastly, in order to make the processing idempotent, we modify the Record
+id according to the pattern <tt class="docutils literal"><span class="pre">&lt;record_time&gt;-&lt;src_ip&gt;-&lt;dest_ip&gt;</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>- processor: id_modifier
+  component: com.hurence.logisland.processor.ModifyId
+  type: processor
+  documentation: convert some field to a given type
+  configuration:
+    id.generation.strategy: fromFields
+    fields.to.hash: record_time,src_ip,dest_ip
+    java.formatter.string: &quot;%s-%s-%s&quot;
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-jobs">
+<h3>Run the jobs<a class="headerlink" href="#run-the-jobs" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><p class="first">create the index into Elasticsearch</p>
+<div class="highlight-python"><div class="highlight"><pre># send mapping
+curl -XPUT http://sandbox:9200/ctu-13 -d @conf/ctu-13-mapping.json
+
+# verify that the index is correct
+curl -XGET http://sandbox:9200/ctu-13?pretty=1
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start a logisland job that will index incoming records</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">logisland</span>
+<span class="nb">bin</span><span class="o">/</span><span class="n">logisland</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">conf</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">logisland</span><span class="o">-</span><span class="n">flow</span><span class="o">-</span><span class="n">analytics</span><span class="o">-</span><span class="n">ml</span><span class="o">-</span><span class="n">jobs</span><span class="o">/</span><span class="n">conf</span><span class="o">/</span><span class="n">index</span><span class="o">-</span><span class="n">binetflow</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start a logisland job that will parse incoming bidirectionnal netflow
+events.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cd</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">logisland</span>
+<span class="nb">bin</span><span class="o">/</span><span class="n">logisland</span><span class="o">.</span><span class="n">sh</span> <span class="o">--</span><span class="n">conf</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">logisland</span><span class="o">-</span><span class="n">flow</span><span class="o">-</span><span class="n">analytics</span><span class="o">-</span><span class="n">ml</span><span class="o">-</span><span class="n">jobs</span><span class="o">/</span><span class="n">conf</span><span class="o">/</span><span class="n">parse</span><span class="o">-</span><span class="n">binetflow</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">send some records to Logisland through Kafka topic with <tt class="docutils literal"><span class="pre">kafkacat</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre>cat /tmp/capture20110810.binetflow | kafkacat -b sandbox:9092 -t binetflow_raw
+</pre></div>
+</div>
+</li>
+<li><p class="first">find all botnet events in elasticsearch</p>
+<div class="highlight-python"><div class="highlight"><pre>curl -XGET http://sandbox:9200/ctu-13/_search?pretty=1&amp;q=Botnet
+</pre></div>
+</div>
+</li>
+<li><p class="first">Checkout spark streaming application in your browser at
+<a class="reference external" href="http://sandbox:4050">http://sandbox:4050</a></p>
+</li>
+</ol>
+<div class="figure">
+<img alt="" src="_images/spark-indexation.png" />
+</div>
+<p>drill down to a batch detail</p>
+<div class="figure">
+<img alt="" src="_images/spark-indexation-batch.png" />
+</div>
+<p>drill down to a stage detail</p>
+<div class="figure">
+<img alt="" src="_images/spark-indexation-stage.png" />
+</div>
+<ol class="arabic simple" start="7">
+<li>go to kibana web ui <a class="reference external" href="http://sandbox:5601">http://sandbox:5601</a> to setup <tt class="docutils literal"><span class="pre">ctu-13</span></tt> index</li>
+</ol>
+<div class="figure">
+<img alt="" src="_images/kibana-configure-index.png" />
+</div>
+<p>then click on <tt class="docutils literal"><span class="pre">Discover</span></tt> and adjust absolute time range filter (top
+right) from <tt class="docutils literal"><span class="pre">2011-08-10</span> <span class="pre">09:00:00.000</span></tt> to <tt class="docutils literal"><span class="pre">2011-08-10</span> <span class="pre">18:00:00.000</span></tt></p>
+<div class="figure">
+<img alt="" src="_images/kibana-adjust-dates.png" />
+</div>
+<p>enter <tt class="docutils literal"><span class="pre">Botnet</span></tt> in the search bar to search only Botnet flows. click on
+some fields to see Quick counts</p>
+<div class="figure">
+<img alt="" src="_images/kibana-filter-botnets.png" />
+</div>
+</div>
+</div>
+<div class="section" id="network-footprint-analysis-through-machine-learning">
+<h2>Network footprint analysis through Machine learning<a class="headerlink" href="#network-footprint-analysis-through-machine-learning" title="Permalink to this headline">¶</a></h2>
+<p>In this lab will show how to experiment some Machine Learning on a
+labeled dataset with both Logisland and Spark MLLib. We will make a
+small Spark job which will use some of the Logisland processors that we
+have already been using in conjonction with a cyber-security plugin
+called <tt class="docutils literal"><span class="pre">botsearch</span></tt>.</p>
+<div class="section" id="botsearch-algorithm">
+<h3>Botsearch algorithm<a class="headerlink" href="#botsearch-algorithm" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">botsearch</span></tt> tries to detects malware infections in network traffic by
+comparing statistical features of the traffic to previously-observed bot
+activity. Therefore, <tt class="docutils literal"><span class="pre">botsearch</span></tt> operates in two phases: a training
+phase and a detection phase.</p>
+<p>During the training phase, <tt class="docutils literal"><span class="pre">botsearch</span></tt> learns the statistical
+properties that are characteristic of the command and control traffic of
+different bot families. Then, it uses these statistical properties to
+create models that can identify similar traffic. In the detection phase,
+the models are applied to the traffic under investigation. This allows
+<tt class="docutils literal"><span class="pre">botsearch</span></tt> to identify potential bot infections in the network, even
+when the bots use encrypted C&amp;C communication.</p>
+<p>First, we need to obtain input for our system. In the training phase,
+this input is generated by executing malware samples in a controlled
+environment and capturing the traffic that these samples produce. In the
+second step, we reassemble the flows in the captured traffic; a step
+that can be omitted when NetFlow data is used instead of full packet
+captures. In the third step, we aggregate the flows in traces –
+chronologically-ordered sequences of connections between two IP
+addresses on a given destination port. <tt class="docutils literal"><span class="pre">botsearch</span></tt> then extracts five
+statistical features for each trace in the forth step. These statistical
+features are :</p>
+<ul class="simple">
+<li>the average time between the start times of two subsequent flows in
+the trace</li>
+<li>the average duration of a connection</li>
+<li>the number of bytes on average transferred to the source</li>
+<li>the number of bytes on average transferred to the destination</li>
+<li>a Fourier Transformation over the flow start times in the trace.</li>
+</ul>
+<p>The latter allows us to identify underlying frequencies of communication
+that might not be captured by using simple averages.</p>
+<p>Finally, in the fifth step, <tt class="docutils literal"><span class="pre">botsearch</span></tt> leverages the aforementioned
+features to build models. During model creation, <tt class="docutils literal"><span class="pre">botsearch</span></tt> clusters
+the observed feature values. Each feature is treated separately to
+reflect the fact that we did not always observe correlations between
+features: For example, a malware family might exhibit similar
+periodicity between their C&amp;C communications, but each connection
+transmits a very different number of bytes. The combination of multiple
+clusters for each of a bot’s features produces the final malware family
+model.</p>
+</div>
+<div class="section" id="bootstrap-the-application">
+<h3>Bootstrap the application<a class="headerlink" href="#bootstrap-the-application" title="Permalink to this headline">¶</a></h3>
+<p>This app has been written in Java, it would have been mush simpler in
+Scala... We first need a spark context :</p>
+<div class="highlight-python"><div class="highlight"><pre>// Initialize Spark configuration &amp; context
+String appName = &quot;KMeansClustering&quot;;
+SparkConf sparkConf = new SparkConf()
+        .setAppName(appName)
+        .setMaster(&quot;local[*]&quot;)
+        .set(&quot;spark.executor.memory&quot;, &quot;3g&quot;);
+JavaSparkContext sc = new JavaSparkContext(sparkConf);
+</pre></div>
+</div>
+<p>We read data file from file system and return it as RDD of strings:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">JavaRDD</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">linesRDD</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">textFile</span><span class="p">(</span><span class="n">inputPathFile</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>the we initialize 2 logisland processors that has previously been used
+in parsing job. One to split the string according to regexp groups, the
+other to adjust the business date.</p>
+<div class="highlight-python"><div class="highlight"><pre>// Split Text Processor :
+Processor splitTextProcessor = new SplitText();
+StandardProcessContext splitTextContext = new StandardProcessContext(splitTextProcessor, &quot;splitTextProcessor&quot;);
+splitTextContext.setProperty(&quot;value.fields&quot;, &quot;timestamp,duration,protocol,src_ip,src_port,direction,dest_ip,dest_port,state,src_tos,dest_tos,packets_out,bytes_out,bytes_in,label&quot;);
+splitTextContext.setProperty(&quot;value.regex&quot;, &quot;(\\d{4}\\/\\d{2}\\/\\d{2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}\\.\\d{0,6}),([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,([^,]+)?,flow=([^,]+)&quot;);
+
+// BiNetFlow Processor :
+Processor updateBiNetflowDate = new UpdateBiNetflowDate();
+StandardProcessContext updateBiNetflowDateContext = new StandardProcessContext(updateBiNetflowDate, &quot;updateBiNetflowDate&quot;);
+</pre></div>
+</div>
+<p>We then use those 2 <tt class="docutils literal"><span class="pre">Logisland</span></tt> Processors to create a distributed
+dataset of netflow <tt class="docutils literal"><span class="pre">Records</span></tt>. This step will produce a distributed
+collection of (String, Record) tupples. The key of the tupple is a
+string formed with <tt class="docutils literal"><span class="pre">&lt;src_ip&gt;_&lt;dest_ip&gt;</span></tt> and the value is the netflow
+Record itself</p>
+<div class="highlight-python"><div class="highlight"><pre>PairFunction&lt;String, String, Record&gt; mapFunction = new PairFunction&lt;String, String, Record&gt;() {
+    public Tuple2&lt;String, Record&gt; call(String line) {
+
+        Record r = RecordUtils.getKeyValueRecord(&quot;&quot;, line);
+        List&lt;Record&gt; list = new ArrayList&lt;&gt;();
+        list.add(r);
+        Collection&lt;Record&gt; tempRecords = splitTextProcessor.process(splitTextContext, list);
+        Collection&lt;Record&gt; records = updateBiNetflowDate.process(updateBiNetflowDateContext, tempRecords);
+
+        try {
+            Record record = records.iterator().next();
+            String ipSource = record.getField(&quot;src_ip&quot;).asString();
+            String ipTarget = record.getField(&quot;dest_ip&quot;).asString();
+
+            return new Tuple2&lt;&gt;(ipSource + &quot;_&quot; + ipTarget, record);
+        } catch (Exception ex) {
+            return new Tuple2&lt;&gt;(&quot;unknown&quot;, null);
+        }
+    }
+};
+
+JavaPairRDD&lt;String, Record&gt; flowsRDD = linesRDD.mapToPair(mapFunction);
+</pre></div>
+</div>
+<p>then comes the major step, the trace computation. We will first group
+all the records by key. convert them to HttpFlow, sort them by date and
+compute the traces.</p>
+<div class="figure">
+<img alt="" src="_images/traces.png" />
+</div>
+<p>The trace computation algorithm can be describe by the following steps :</p>
+<ol class="arabic simple">
+<li>we compute some flow statistics: loop around flows to compute the
+average time interval between two flows, the average uploaded byte
+amount as well as downloaded byte amount, the smallestTimeInterval
+and the biggestTimeInterval between all the netflows.</li>
+<li>We represents our trace like a binary signal by assigning it to be 1
+at each connection start, and 0 in-between connections. To calculate
+a high-quality FFT, we&#8217;ve used a sampling intervalof 1=4th of the
+smallest time interval in the trace, which ensures thatwe do not
+undersample. However, if the distance between two netﬂows is
+extremely small and large gaps occur between other ﬂows of the trace,
+this sampling method can lead to a Significant amount of data points.
+In such cases, we limit the length of our FFT trace to 2^16 = 65 536
+datapoints and accept minor undersampling. We chose this value as the
+FFT is fastest for a length of power of two</li>
+<li>In the next step, we compute the Power Spectral Density (PSD) of the
+Fast Fourier Transformation over our sampled trace and extract the
+most significant frequency. The FFT peaks are correlated with time
+periodicities and resistant against irregular large gaps in the
+trace. We observed the introduction of gaps in the wild for bots in
+which communication with the C&amp;C server is periodic and then pauses
+for a while. When malware authors randomly vary the C&amp;C connection
+frequency within a certain window, the random variation lowers the
+FFT peak. However, the peak remains detectable and at the same
+frequency, enabling the detection of the malware communication.</li>
+</ol>
+<p>Here is the code :</p>
+<div class="highlight-python"><div class="highlight"><pre>JavaPairRDD&lt;String, NetworkTrace&gt; traces = flowsRDD
+    .groupByKey()
+    .map(t -&gt; {
+        Trace trace = new Trace();
+        try {
+            Iterable&lt;Record&gt; flowRecords = t._2;
+            String[] tokens = t._1.split(&quot;_&quot;);
+
+            trace.setIpSource(tokens[0]);
+            trace.setIpTarget(tokens[1]);
+
+            // set up the flows buffer
+            ArrayList&lt;HttpFlow&gt; flows = new ArrayList&lt;&gt;();
+            flowRecords.forEach(flowRecord -&gt; {
+                HttpFlow flow = new HttpFlow();
+                flow.setDate(new java.util.Date(flowRecord.getField(&quot;record_time&quot;).asLong()));
+                flow.setipSource(flowRecord.getField(&quot;src_ip&quot;).asString());
+                flow.setIpTarget(flowRecord.getField(&quot;dest_ip&quot;).asString());
+                flow.setRequestSize(flowRecord.getField(&quot;bytes_in&quot;).asLong());
+                flow.setResponseSize(flowRecord.getField(&quot;bytes_out&quot;).asLong());
+                flows.add(flow);
+            });
+
+            // we need at least 5 flows to compute one trace
+            if (flows.size() &gt; 5) {
+                // flows need to be sorted on timestamp
+                flows.sort(new Comparator&lt;HttpFlow&gt;() {
+                    @Override
+                    public int compare(HttpFlow flow2, HttpFlow flow1) {
+                        return flow1.getDate().compareTo(flow2.getDate());
+                    }
+                });
+
+                flows.forEach(trace::add);
+
+                // compute trace frequencies and stats
+                trace.compute();
+            }
+        } catch (Exception ignored) {
+
+        }
+
+        return trace;
+    })
+    .mapToPair(trace -&gt; new Tuple2&lt;String, NetworkTrace&gt;(
+            trace.getIpSource() + &quot;_&quot; + trace.getIpTarget(),
+            new NetworkTrace(
+                trace.getIpSource(),
+                trace.getIpTarget(),
+                (float) trace.getAvgUploadedBytes(),
+                (float) trace.getAvgDownloadedBytes(),
+                (float) trace.getAvgTimeBetweenTwoFLows(),
+                (float) trace.getMostSignificantFrequency(),
+                trace.getFlows().size(),
+                &quot;&quot;,
+                0)))
+    .cache();
+</pre></div>
+</div>
+<p>Now we&#8217;ll go into the vectorization of the traces, and transform them
+into a dense 4 dimensions vector</p>
+<div class="highlight-python"><div class="highlight"><pre>// Convert traces into a Dense vector
+JavaRDD&lt;Tuple2&lt;String, Vector&gt;&gt; tracesTuple = traces.map(t -&gt; {
+    double[] values = new double[4];
+    values[0] = t._2.avgUploadedBytes();
+    values[1] = t._2.avgDownloadedBytes();
+    values[2] = t._2.avgTimeBetweenTwoFLows();
+    values[3] = t._2.mostSignificantFrequency();
+    return new Tuple2&lt;&gt;(t._1, Vectors.dense(values));
+}).cache();
+</pre></div>
+</div>
+<p>Don&#8217;t forget to scale the vector to get mean = 0 and std = 1 elsewhere
+you&#8217;ll get a pretty huge bias as we will compare carots and
+cauliflowers.</p>
+<div class="highlight-python"><div class="highlight"><pre>StandardScaler scaler = new StandardScaler(true, true);
+RDD&lt;Vector&gt; tracesVector = tracesTuple.map(tv -&gt; tv._2).rdd();
+StandardScalerModel scalerModel = scaler.fit(tracesVector);
+JavaRDD&lt;Tuple2&lt;String, Vector&gt;&gt; scaledTraces = tracesTuple.map(x -&gt; new Tuple2&lt;&gt;(x._1, scalerModel.transform(x._2)));
+</pre></div>
+</div>
+<p>Now that we have some well formed scaled vectors of features, we can run
+K-means clustering to segment our traces.</p>
+<div class="figure">
+<img alt="" src="_images/kmeans.jpg" />
+</div>
+<div class="highlight-python"><div class="highlight"><pre>// Cluster the data into two classes using KMeans k:$nbClusters, nbIterations:$nbIterations
+KMeansModel clusters = KMeans.train(scaledTraces.map(x -&gt; x._2).rdd(), nbClusters, nbIterations);
+
+// Display cluster centers :
+displayClustersCenters(clusters);
+</pre></div>
+</div>
+<p>At this step, we have computed a kmeans model, made of 4-dimension
+centroids. And we can assign a clusterId to each trace. And finally we
+send the whole traces to Kafka, on the same topic as the previous
+stream, so that the logisland indexing stream can also handle theses
+trace events too.</p>
+<div class="highlight-python"><div class="highlight"><pre>// Assign traces to clusters
+JavaPairRDD&lt;String, Integer&gt; centroids = scaledTraces.mapToPair(t -&gt; new Tuple2&lt;&gt;(t._1, clusters.predict(t._2)));
+
+// Assign centroidId to traces
+centroids.join(traces, 8).foreachPartition(it -&gt; {
+
+    //Configure the Producer
+    Properties configProperties = new Properties();
+    configProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, &quot;sandbox:9092&quot;);
+    configProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, &quot;org.apache.kafka.common.serialization.ByteArraySerializer&quot;);
+    configProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, &quot;org.apache.kafka.common.serialization.ByteArraySerializer&quot;);
+
+    Producer producer = new KafkaProducer(configProperties);
+    it.forEachRemaining( t -&gt; {
+
+        String traceId = t._1();
+        int centroidId = t._2()._1();
+        NetworkTrace trace = t._2()._2();
+
+
+        Record record = new StandardRecord(&quot;botsearch_trace&quot;)
+                .setStringField(&quot;search_index&quot;, &quot;ctu-13&quot;)
+                .setId(traceId)
+                .setField(&quot;centroid_id&quot;, FieldType.STRING, centroidId)
+                .setField(&quot;src_ip&quot;, FieldType.STRING, trace.ipSource())
+                .setField(&quot;dest_ip&quot;, FieldType.STRING, trace.ipTarget())
+                .setField(&quot;avg_uploaded_bytes&quot;, FieldType.FLOAT, trace.avgUploadedBytes())
+                .setField(&quot;avg_downloaded_bytes&quot;, FieldType.FLOAT, trace.avgDownloadedBytes())
+                .setField(&quot;avg_time_between_two_fLows&quot;, FieldType.FLOAT, trace.avgTimeBetweenTwoFLows())
+                .setField(&quot;most_significant_frequency&quot;, FieldType.FLOAT, trace.mostSignificantFrequency())
+                .setField(&quot;flows_count&quot;, FieldType.LONG, trace.flowsCount());
+
+        RecordSerializer serializer = new KryoSerializer(true);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.serialize(baos, record);
+
+        ProducerRecord&lt;byte[], byte[]&gt; rec = new ProducerRecord&lt;&gt;(&quot;binetflow_events&quot;, traceId.getBytes(), baos.toByteArray());
+        producer.send(rec);
+        try {
+            baos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    });
+    producer.close();
+
+});
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-clustering">
+<h3>Run the clustering<a class="headerlink" href="#run-the-clustering" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><p class="first">We will launch the clustering job with the
+<tt class="docutils literal"><span class="pre">/tmp/capture20110810.binetflow</span></tt> file and save the centroids in one
+file called <tt class="docutils literal"><span class="pre">/tmp/clusters.txt</span></tt>. Just start with 10 clusters and 10
+iterations.</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /usr/local/logisland-flow-analytics-ml-jobs
+#mvn compile assembly:single
+
+/usr/local/spark/bin/spark-submit --class com.hurence.logisland.jobs.KMeansClustering --driver-memory 8g target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar -nbClusters 10 -nbIterations 10 -inputPath /tmp/capture20110810.binetflow -outputPath /tmp/clusters.txt
+</pre></div>
+</div>
+</li>
+<li><p class="first">The resulting centroid should look like the following :</p>
+<div class="highlight-python"><div class="highlight"><pre>Cluster Center 0: [ &#39;Average uploaded bytes&#39;: -0.004762804352565624, &#39;Average downloaded bytes&#39;: -0.006434461345251199, &#39;Average time between two flows&#39;: 0.1714331420028378, &#39;Most Significant Frequency&#39;: -0.19472068689355237 ]
+Cluster Center 1: [ &#39;Average uploaded bytes&#39;: 23.847880147671972, &#39;Average downloaded bytes&#39;: 388.6130233752165, &#39;Average time between two flows&#39;: -4.587405304268049, &#39;Most Significant Frequency&#39;: 2.180556475503876 ]
+Cluster Center 2: [ &#39;Average uploaded bytes&#39;: 633.756107444736, &#39;Average downloaded bytes&#39;: 170.41500459257244, &#39;Average time between two flows&#39;: -1.2520176112615478, &#39;Most Significant Frequency&#39;: 5.488399613909684 ]
+Cluster Center 3: [ &#39;Average uploaded bytes&#39;: 0.03249432630082737, &#39;Average downloaded bytes&#39;: 0.01976826657423998, &#39;Average time between two flows&#39;: -7.611985863898892, &#39;Most Significant Frequency&#39;: 3.6782110287686467 ]
+Cluster Center 4: [ &#39;Average uploaded bytes&#39;: 0.04291827526782946, &#39;Average downloaded bytes&#39;: 0.031986211635606186, &#39;Average time between two flows&#39;: -1.070165821772272, &#39;Most Significant Frequency&#39;: 7.682881299532897 ]
+Cluster Center 5: [ &#39;Average uploaded bytes&#39;: 0.08512160297573648, &#39;Average downloaded bytes&#39;: 0.14225052937437158, &#39;Average time between two flows&#39;: -1.1382353609756743, &#39;Most Significant Frequency&#39;: 3.366819813123287 ]
+Cluster Center 6: [ &#39;Average uploaded bytes&#39;: 316.2511432025284, &#39;Average downloaded bytes&#39;: 121.52914874544881, &#39;Average time between two flows&#39;: -4.800965640138641, &#39;Most Significant Frequency&#39;: 3.500625104482574 ]
+Cluster Center 7: [ &#39;Average uploaded bytes&#39;: 9.359717794125272, &#39;Average downloaded bytes&#39;: 101.44540188177837, &#39;Average time between two flows&#39;: -2.918521013590664, &#39;Most Significant Frequency&#39;: 2.663547817590244 ]
+Cluster Center 8: [ &#39;Average uploaded bytes&#39;: 132.49639037888568, &#39;Average downloaded bytes&#39;: 43.85958413673529, &#39;Average time between two flows&#39;: -4.795757418834234, &#39;Most Significant Frequency&#39;: 4.001404480917403 ]
+Cluster Center 9: [ &#39;Average uploaded bytes&#39;: 0.012003654687921273, &#39;Average downloaded bytes&#39;: 0.014284479381833907, &#39;Average time between two flows&#39;: -4.12222261451248, &#39;Most Significant Frequency&#39;: 4.311217671762223 ]
+</pre></div>
+</div>
+</li>
+<li><p class="first">Try some visual analytics of thoses cluster. GO to Kibana and update
+the CTU-13 index parttern in the <tt class="docutils literal"><span class="pre">management</span></tt> section. Go in the
+discover section and look at the latest events (indexed during the
+latest 15&#8217;). Filter to keep only those which have more than 0
+<tt class="docutils literal"><span class="pre">flow_count</span></tt>. Try to compare clusterId repartition for src_ip:
+147.32.84.165 and other traces.</p>
+</li>
+</ol>
+<div class="figure">
+<img alt="" src="_images/clustering.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="atelier-jdev-3-spark.html" title="previous chapter (use the left arrow)">3. An introduction to Big Data analysis with Spark</a>
+      </div>
+    
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="atelier-jdev-3-spark.html" title="3. An introduction to Big Data analysis with Spark"
+             >previous</a> |</li>
+        <li><a href="index.html">Logisland - JDev 2017 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2017, Thomas Bailet. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

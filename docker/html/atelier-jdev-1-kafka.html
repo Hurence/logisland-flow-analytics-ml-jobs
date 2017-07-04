@@ -1,0 +1,943 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>1. Big data messaging with Kafka &mdash; Logisland - JDev 2017 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Logisland - JDev 2017 1.0 documentation" href="index.html" />
+    <link rel="next" title="2. Functional programming with Scala" href="atelier-jdev-2-scala.html" />
+    <link rel="prev" title="Welcome to Logisland - JDev 2017’s documentation!" href="index.html" />
+  
+   
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="atelier-jdev-2-scala.html" title="2. Functional programming with Scala"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Logisland - JDev 2017’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Logisland - JDev 2017 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+        <a href="
+    index.html" class="text-logo">Logisland - JDev 2017</a>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">1. Big data messaging with Kafka</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#an-introduction-to-kafka-tools">An introduction to Kafka tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-simple-producer-consumer-application">A simple producer/consumer application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-kafka-s-partitions-message-offsets-and-consumer-groups-to-handle-up-to-millions-of-messages-per-day">Use Kafka&#8217;s partitions, message offsets, and consumer groups to handle up to millions of messages per day</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-2-scala.html">2. Functional programming with Scala</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-3-spark.html">3. An introduction to Big Data analysis with Spark</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-4-logisland.html">4. Botnet traces mining with logisland</a></li>
+</ul>
+
+    
+  </div>
+</div>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>1. Big data messaging with Kafka</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="big-data-messaging-with-kafka">
+<h1>1. Big data messaging with Kafka<a class="headerlink" href="#big-data-messaging-with-kafka" title="Permalink to this headline">¶</a></h1>
+<p>Build a continuous big data messaging system with Kafka</p>
+<p><strong>credits</strong> : Sunil Patil, Software Engineer, JavaWorld | APR 25, 2016</p>
+<ul class="simple">
+<li>An introduction to Kafka tools</li>
+<li>Quick setup and demo</li>
+<li>A simple producer/consumer application</li>
+<li>Use Kafka&#8217;s partitions, message offsets, and consumer groups to
+handle up to millions of messages per day</li>
+</ul>
+<div class="section" id="an-introduction-to-kafka-tools">
+<h2>An introduction to Kafka tools<a class="headerlink" href="#an-introduction-to-kafka-tools" title="Permalink to this headline">¶</a></h2>
+<p>When the big data movement started it was mostly focused on batch
+processing. Distributed data storage and querying tools like MapReduce,
+Hive, and Pig were all designed to process data in batches rather than
+continuously. Businesses would run multiple jobs every night to extract
+data from a database, then analyze, transform, and eventually store the
+data. More recently enterprises have discovered the power of analyzing
+and processing data and events as they happen, not just once every few
+hours. Most traditional messaging systems don&#8217;t scale up to handle big
+data in realtime, however. So engineers at LinkedIn built and
+open-sourced Kafka: a distributed messaging framework that meets the
+demands of big data by scaling on commodity hardware.</p>
+<p>Over the past few years, Kafka has emerged to solve a variety of use
+cases. In the simplest case, it could be a simple buffer for storing
+application logs. Combined with a technology like Spark Streaming, it
+can be used to track data changes and take action on that data before
+saving it to a final destination. Kafka&#8217;s predictive mode makes it a
+powerful tool for detecting fraud, such as checking the validity of a
+credit card transaction when it happens, and not waiting for batch
+processing hours later.</p>
+<p>This two-part tutorial introduces Kafka, starting with how to install
+and run it in your development environment. You&#8217;ll get an overview of
+Kafka&#8217;s architecture, followed by an introduction to developing an
+out-of-the-box Kafka messaging system. Finally, you&#8217;ll build a custom
+producer/consumer application that sends and consumes messages via a
+Kafka server. In the second half of the tutorial you&#8217;ll learn how to
+partition and group messages, and how to control which messages a Kafka
+consumer will consume.</p>
+<div class="section" id="what-is-kafka">
+<h3>What is Kafka?<a class="headerlink" href="#what-is-kafka" title="Permalink to this headline">¶</a></h3>
+<p>Apache Kafka is messaging system built to scale for big data. Similar to
+Apache ActiveMQ or RabbitMq, Kafka enables applications built on
+different platforms to communicate via asynchronous message passing. But
+Kafka differs from these more traditional messaging systems in key ways:</p>
+<ul class="simple">
+<li>It&#8217;s designed to scale horizontally, by adding more commodity
+servers.</li>
+<li>It provides much higher throughput for both producer and consumer
+processes.</li>
+<li>It can be used to support both batch and real-time use cases.</li>
+<li>It doesn&#8217;t support JMS, Java&#8217;s message-oriented middleware API.</li>
+</ul>
+</div>
+<div class="section" id="kafka-s-architecture">
+<h3>Kafka&#8217;s architecture<a class="headerlink" href="#kafka-s-architecture" title="Permalink to this headline">¶</a></h3>
+<p>Before we explore Kafka&#8217;s architecture, you should know its basic
+terminology:</p>
+<ul class="simple">
+<li>A producer is process that can publish a message to a topic.</li>
+<li>a consumer is a process that can subscribe to one or more topics and
+consume messages published to topics.</li>
+<li>A topic category is the name of the feed to which messages are
+published.</li>
+<li>A broker is a process running on single machine.</li>
+<li>A cluster is a group of brokers working together.</li>
+</ul>
+<p>Figure 1: Kafka&#8217;s architecture Figure 1. Architecture of a Kafka message
+system</p>
+<div class="figure">
+<img alt="_images/kafka-design.png" src="_images/kafka-design.png" />
+</div>
+<p>Kafka&#8217;s architecture is very simple, which can result in better
+performance and throughput in some systems. Every topic in Kafka is like
+a simple log file. When a producer publishes a message, the Kafka server
+appends it to the end of the log file for its given topic. The server
+also assigns an offset, which is a number used to permanently identify
+each message. As the number of messages grows, the value of each offset
+increases; for example if the producer publishes three messages the
+first one might get an offset of 1, the second an offset of 2, and the
+third an offset of 3.</p>
+<p>When the Kafka consumer first starts, it will send a pull request to the
+server, asking to retrieve any messages for a particular topic with an
+offset value higher than 0. The server will check the log file for that
+topic and return the three new messages. The consumer will process the
+messages, then send a request for messages with an offset higher than 3,
+and so on.</p>
+<p>In Kafka, the client is responsible for remembering the offset count and
+retrieving messages.The Kafka server doesn&#8217;t track or manage message
+consumption. By default, a Kafka server will keep a message for seven
+days. A background thread in the server checks and deletes messages that
+are seven days or older. A consumer can access messages as long as they
+are on the server. It can read a message multiple times, and even read
+messages in reverse order of receipt. But if the consumer fails to
+retrieve the message before the seven days are up, it will miss that
+message.</p>
+</div>
+<div class="section" id="kafka-benchmarks">
+<h3>Kafka benchmarks<a class="headerlink" href="#kafka-benchmarks" title="Permalink to this headline">¶</a></h3>
+<p>Production use by LinkedIn and other enterprises has shown that with
+proper configuration Kafka is capable of processing hundreds of
+gigabytes of data daily. In 2011, three LinkedIn engineers used
+benchmark testing to demonstrate that Kafka could achieve much higher
+throughput than ActiveMQ and RabbitMQ.</p>
+<p><a class="reference external" href="http://bravenewgeek.com/benchmarking-message-queue-latency/">http://bravenewgeek.com/benchmarking-message-queue-latency/</a></p>
+</div>
+<div class="section" id="run-quick-setup-and-demo">
+<h3>[RUN] Quick setup and demo<a class="headerlink" href="#run-quick-setup-and-demo" title="Permalink to this headline">¶</a></h3>
+<p>We&#8217;ll build a custom application in this tutorial, but let&#8217;s start by
+installing and testing a Kafka instance with an out-of-the-box producer
+and consumer.</p>
+<ol class="arabic">
+<li><p class="first">Visit the Kafka download page to install the most recent version.
+Extract the binaries into a software/kafka folder. Change your
+current directory to point to the new folder.</p>
+<div class="highlight-python"><div class="highlight"><pre>wget http://mirrors.ircam.fr/pub/apache/kafka/0.10.2.0/kafka_2.11-0.10.2.0.tgz
+tar -xzf kafka_2.11-0.10.2.0.tgz
+cd kafka_2.11-0.10.2.0
+</pre></div>
+</div>
+</li>
+<li><p class="first">start a ZooKeeper server if you don&#8217;t already have one.</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/zookeeper-server-start.sh config/zookeeper.properties
+</pre></div>
+</div>
+</li>
+<li><p class="first">Now start the Kafka server:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/kafka-server-start.sh config/server.properties
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create a test topic that you can use for testing:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/kafka-topics.sh --create --zookeeper localhost:2181 \
+    --replication-factor 1 --partitions 1 --topic javaworld.
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start a simple console consumer that can consume messages published
+to a given topic, such as javaworld:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/kafka-console-consumer.sh --zookeeper localhost:2181 \
+    --topic javaworld --from-beginning.
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start up a simple producer console that can publish messages to the
+test topic:</p>
+<div class="highlight-python"><div class="highlight"><pre>bin/kafka-console-producer.sh --broker-list localhost:9092 \
+    --topic javaworld.
+</pre></div>
+</div>
+</li>
+<li><p class="first">Try typing one or two messages into the producer console. Your
+messages should show in the consumer console.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="a-simple-producer-consumer-application">
+<h2>A simple producer/consumer application<a class="headerlink" href="#a-simple-producer-consumer-application" title="Permalink to this headline">¶</a></h2>
+<p>You&#8217;ve seen how Kafka works out of the box. Next, let&#8217;s develop a custom
+producer/consumer application. The producer will retrieve user input
+from the console and send each new line as a message to a Kafka server.
+The consumer will retrieve messages for a given topic and print them to
+the console. The producer and consumer components in this case are your
+own implementations of kafka-console-producer.sh and
+kafka-console-consumer.sh.</p>
+<p>Let&#8217;s start by creating a Producer.java class. This client class
+contains logic to read user input from the console and send that input
+as a message to the Kafka server.</p>
+<p>We configure the producer by creating an object from the
+java.util.Properties class and setting its properties. The
+ProducerConfig class defines all the different properties available, but
+Kafka&#8217;s default values are sufficient for most uses. For the default
+config we only need to set three mandatory properties:</p>
+<ul class="simple">
+<li>BOOTSTRAP_SERVERS_CONFIG</li>
+<li>KEY_SERIALIZER_CLASS_CONFIG</li>
+<li>VALUE_SERIALIZER_CLASS_CONFIG</li>
+</ul>
+<p>BOOTSTRAP_SERVERS_CONFIG (bootstrap.servers) sets a list of host:port
+pairs used for establishing the initial connections to the Kakfa cluster
+in the host1:port1,host2:port2,... format. Even if we have more than one
+broker in our Kafka cluster, we only need to specify the value of the
+first broker&#8217;s host:port. The Kafka client will use this value to make a
+discover call on the broker, which will return a list of all the brokers
+in the cluster. It&#8217;s a good idea to specify more than one broker in the
+BOOTSTRAP_SERVERS_CONFIG, so that if that first broker is down the
+client will be able to try other brokers.</p>
+<p>The Kafka server expects messages in byte[] key, byte[] value format.
+Rather than converting every key and value, Kafka&#8217;s client-side library
+permits us to use friendlier types like String and int for sending
+messages. The library will convert these to the appropriate type. For
+example, the sample app doesn&#8217;t have a message-specific key, so we&#8217;ll
+use null for the key. For the value we&#8217;ll use a String, which is the
+data entered by the user on the console.</p>
+<p>To configure the message key, we set a value of
+KEY_SERIALIZER_CLASS_CONFIG on the
+org.apache.kafka.common.serialization.ByteArraySerializer. This works
+because null doesn&#8217;t need to be converted into byte[]. For the message
+value, we set VALUE_SERIALIZER_CLASS_CONFIG on the
+org.apache.kafka.common.serialization.StringSerializer, because that
+class knows how to convert a String into a byte[].</p>
+<p>Custom key/value objects Similar to StringSerializer, Kafka provides
+serializers for other primitives such as int and long. In order to use a
+custom object for our key or value, we would need to create a class
+implementing org.apache.kafka.common.serialization.Serializer. We could
+then add logic to serialize the class into byte[]. We would also have to
+use a corresponding deserializer in our consumer code.</p>
+<div class="section" id="the-kafka-producer">
+<h3>The Kafka producer<a class="headerlink" href="#the-kafka-producer" title="Permalink to this headline">¶</a></h3>
+<p>After filling the Properties class with the necessary configuration
+properties, we can use it to create an object of KafkaProducer. Whenever
+we want to send a message to the Kafka server after that, we&#8217;ll create
+an object of ProducerRecord and call the KafkaProducer&#8217;s send() method
+with that record to send the message. The ProducerRecord takes two
+parameters: the name of the topic to which message should be published,
+and the actual message. Don&#8217;t forget to call the Producer.close() method
+when you&#8217;re done using the producer:</p>
+<p>Listing 1. KafkaProducer</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Producer</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="n">Scanner</span> <span class="n">in</span><span class="o">;</span>
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">argv</span><span class="o">)</span><span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">argv</span><span class="o">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+          <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Please specify 1 parameters &quot;</span><span class="o">);</span>
+          <span class="n">System</span><span class="o">.</span><span class="na">exit</span><span class="o">(-</span><span class="mi">1</span><span class="o">);</span>
+      <span class="o">}</span>
+      <span class="n">String</span> <span class="n">topicName</span> <span class="o">=</span> <span class="n">argv</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+      <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Scanner</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">in</span><span class="o">);</span>
+      <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Enter message(type exit to quit)&quot;</span><span class="o">);</span>
+
+      <span class="c1">//Configure the Producer</span>
+      <span class="n">Properties</span> <span class="n">configProperties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+      <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">BOOTSTRAP_SERVERS_CONFIG</span><span class="o">,</span><span class="s">&quot;localhost:9092&quot;</span><span class="o">);</span>
+      <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">KEY_SERIALIZER_CLASS_CONFIG</span><span class="o">,</span><span class="s">&quot;org.apache.kafka.common.serialization.ByteArraySerializer&quot;</span><span class="o">);</span>
+      <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">VALUE_SERIALIZER_CLASS_CONFIG</span><span class="o">,</span><span class="s">&quot;org.apache.kafka.common.serialization.StringSerializer&quot;</span><span class="o">);</span>
+
+      <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">kafka</span><span class="o">.</span><span class="na">clients</span><span class="o">.</span><span class="na">producer</span><span class="o">.</span><span class="na">Producer</span> <span class="n">producer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaProducer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">configProperties</span><span class="o">);</span>
+      <span class="n">String</span> <span class="n">line</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">nextLine</span><span class="o">();</span>
+      <span class="k">while</span><span class="o">(!</span><span class="n">line</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&quot;exit&quot;</span><span class="o">))</span> <span class="o">{</span>
+          <span class="n">ProducerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">rec</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ProducerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">topicName</span><span class="o">,</span> <span class="n">line</span><span class="o">);</span>
+          <span class="n">producer</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">rec</span><span class="o">);</span>
+          <span class="n">line</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">nextLine</span><span class="o">();</span>
+      <span class="o">}</span>
+      <span class="n">in</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+      <span class="n">producer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuring-the-message-consumer">
+<h3>Configuring the message consumer<a class="headerlink" href="#configuring-the-message-consumer" title="Permalink to this headline">¶</a></h3>
+<p>Next we&#8217;ll create a simple consumer that subscribes to a topic. Whenever
+a new message is published to the topic, it will read that message and
+print it to the console. The consumer code is quite similar to the
+producer code. We start by creating an object of java.util.Properties,
+setting its consumer-specific properties, and then using it to create a
+new object of KafkaConsumer. The ConsumerConfig class defines all the
+properties that we can set. There are just four mandatory properties:</p>
+<ul class="simple">
+<li>BOOTSTRAP_SERVERS_CONFIG (bootstrap.servers)</li>
+<li>KEY_DESERIALIZER_CLASS_CONFIG (key.deserializer)</li>
+<li>VALUE_DESERIALIZER_CLASS_CONFIG (value.deserializer)</li>
+<li>GROUP_ID_CONFIG (bootstrap.servers)</li>
+</ul>
+<p>Just as we did for the producer class, we&#8217;ll use
+BOOTSTRAP_SERVERS_CONFIG to configure the host/port pairs for the
+consumer class. This config lets us establish the initial connections to
+the Kakfa cluster in the host1:port1,host2:port2,... format.</p>
+<p>As I previously noted, the Kafka server expects messages in byte[] key
+and byte[] value formats, and has its own implementation for serializing
+different types into byte[]. Just as we did with the producer, on the
+consumer side we&#8217;ll have to use a custom deserializer to convert byte[]
+back into the appropriate type.</p>
+<p>In the case of the example application, we know the producer is using
+ByteArraySerializer for the key and StringSerializer for the value. On
+the client side we therefore need to use
+org.apache.kafka.common.serialization.ByteArrayDeserializer for the key
+and org.apache.kafka.common.serialization.StringDeserializer for the
+value. Setting those classes as values for
+KEY_DESERIALIZER_CLASS_CONFIG and VALUE_DESERIALIZER_CLASS_CONFIG
+will enable the consumer to deserialize byte[] encoded types sent by the
+producer.</p>
+<p>Finally, we need to set the value of the GROUP_ID_CONFIG. This should
+be a group name in string format. I&#8217;ll explain more about this config in
+a minute. For now, just look at the Kafka consumer with the four
+mandatory properties set:</p>
+<p>Listing 2. KafkaConsumer</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Consumer</span> <span class="o">{</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="n">Scanner</span> <span class="n">in</span><span class="o">;</span>
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="n">stop</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">argv</span><span class="o">)</span><span class="kd">throws</span> <span class="n">Exception</span><span class="o">{</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">argv</span><span class="o">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+          <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">&quot;Usage: %s &lt;topicName&gt; &lt;groupId&gt;\n&quot;</span><span class="o">,</span>
+                  <span class="n">Consumer</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getSimpleName</span><span class="o">());</span>
+          <span class="n">System</span><span class="o">.</span><span class="na">exit</span><span class="o">(-</span><span class="mi">1</span><span class="o">);</span>
+      <span class="o">}</span>
+      <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Scanner</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">in</span><span class="o">);</span>
+      <span class="n">String</span> <span class="n">topicName</span> <span class="o">=</span> <span class="n">argv</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+      <span class="n">String</span> <span class="n">groupId</span> <span class="o">=</span> <span class="n">argv</span><span class="o">[</span><span class="mi">1</span><span class="o">];</span>
+
+      <span class="n">ConsumerThread</span> <span class="n">consumerRunnable</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConsumerThread</span><span class="o">(</span><span class="n">topicName</span><span class="o">,</span><span class="n">groupId</span><span class="o">);</span>
+      <span class="n">consumerRunnable</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+      <span class="n">String</span> <span class="n">line</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="o">;</span>
+      <span class="k">while</span> <span class="o">(!</span><span class="n">line</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&quot;exit&quot;</span><span class="o">))</span> <span class="o">{</span>
+          <span class="n">line</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+      <span class="o">}</span>
+      <span class="n">consumerRunnable</span><span class="o">.</span><span class="na">getKafkaConsumer</span><span class="o">().</span><span class="na">wakeup</span><span class="o">();</span>
+      <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Stopping consumer .....&quot;</span><span class="o">);</span>
+      <span class="n">consumerRunnable</span><span class="o">.</span><span class="na">join</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ConsumerThread</span> <span class="kd">extends</span> <span class="n">Thread</span><span class="o">{</span>
+      <span class="kd">private</span> <span class="n">String</span> <span class="n">topicName</span><span class="o">;</span>
+      <span class="kd">private</span> <span class="n">String</span> <span class="n">groupId</span><span class="o">;</span>
+      <span class="kd">private</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">kafkaConsumer</span><span class="o">;</span>
+
+      <span class="kd">public</span> <span class="nf">ConsumerThread</span><span class="o">(</span><span class="n">String</span> <span class="n">topicName</span><span class="o">,</span> <span class="n">String</span> <span class="n">groupId</span><span class="o">){</span>
+          <span class="k">this</span><span class="o">.</span><span class="na">topicName</span> <span class="o">=</span> <span class="n">topicName</span><span class="o">;</span>
+          <span class="k">this</span><span class="o">.</span><span class="na">groupId</span> <span class="o">=</span> <span class="n">groupId</span><span class="o">;</span>
+      <span class="o">}</span>
+      <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+          <span class="n">Properties</span> <span class="n">configProperties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+          <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">BOOTSTRAP_SERVERS_CONFIG</span><span class="o">,</span> <span class="s">&quot;localhost:9092&quot;</span><span class="o">);</span>
+          <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">KEY_DESERIALIZER_CLASS_CONFIG</span><span class="o">,</span> <span class="s">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span><span class="o">);</span>
+          <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">VALUE_DESERIALIZER_CLASS_CONFIG</span><span class="o">,</span> <span class="s">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span><span class="o">);</span>
+          <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">GROUP_ID_CONFIG</span><span class="o">,</span> <span class="n">groupId</span><span class="o">);</span>
+          <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">CLIENT_ID_CONFIG</span><span class="o">,</span> <span class="s">&quot;simple&quot;</span><span class="o">);</span>
+
+          <span class="c1">//Figure out where to start processing messages from</span>
+          <span class="n">kafkaConsumer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">configProperties</span><span class="o">);</span>
+          <span class="n">kafkaConsumer</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">topicName</span><span class="o">));</span>
+          <span class="c1">//Start processing messages</span>
+          <span class="k">try</span> <span class="o">{</span>
+              <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                  <span class="n">ConsumerRecords</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">kafkaConsumer</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                  <span class="k">for</span> <span class="o">(</span><span class="n">ConsumerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">record</span> <span class="o">:</span> <span class="n">records</span><span class="o">)</span>
+                      <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">());</span>
+              <span class="o">}</span>
+          <span class="o">}</span><span class="k">catch</span><span class="o">(</span><span class="n">WakeupException</span> <span class="n">ex</span><span class="o">){</span>
+              <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Exception caught &quot;</span> <span class="o">+</span> <span class="n">ex</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+          <span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+              <span class="n">kafkaConsumer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+              <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;After closing KafkaConsumer&quot;</span><span class="o">);</span>
+          <span class="o">}</span>
+      <span class="o">}</span>
+      <span class="kd">public</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">&gt;</span> <span class="nf">getKafkaConsumer</span><span class="o">(){</span>
+         <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">kafkaConsumer</span><span class="o">;</span>
+      <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="consumer-and-consumerthread">
+<h3>Consumer and ConsumerThread<a class="headerlink" href="#consumer-and-consumerthread" title="Permalink to this headline">¶</a></h3>
+<p>Writing the consumer code in Listing 2 in two parts ensures that we
+close the Consumer object before exiting. I&#8217;ll describe each class in
+turn. First, ConsumerThread is an inner class that takes a topic name
+and group name as its arguments. In the run() method it creates a
+KafkaConsumer object, with appropriate properties. It subscribes to the
+topic that was passed as an argument in the constructor, by calling the
+kafkaConsumer.subscribe() method, then polls the Kafka server every 100
+milliseconds to check if there are any new messages in the topic. It
+will iterate through the list of any new messages and print them to the
+console.</p>
+<p>In the Consumer class we create a new object of ConsumerThread and start
+it in a different thread. The ConsumerThead starts an infinite loop and
+keeps polling the topic for new messages. Meanwhile in the Consumer
+class, the main thread waits for a user to enter exit on the console.
+Once a user enters exit, it calls the KafkaConsumer.wakeup() method,
+causing the KafkaConsumer to stop polling for new messages and throw a
+WakeupException. We can then close the KafkaConsumer gracefully, by
+calling kafkaConsumer&#8217;s close() method.</p>
+</div>
+<div class="section" id="run-the-application">
+<h3>[RUN] the application<a class="headerlink" href="#run-the-application" title="Permalink to this headline">¶</a></h3>
+<p>To test this application you can run the code in Listings 1 and 2 from
+your IDE, or you can follow these steps:</p>
+<ol class="arabic simple">
+<li>Download the sample code, by executing the command:</li>
+</ol>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="o">:</span><span class="c1">//github.com/Hurence/logisland-flow-analytics-ml-jobs.git</span>
+</pre></div>
+</div>
+<ol class="arabic" start="2">
+<li><p class="first">Compile the code and create a fat JAR with the command:</p>
+<div class="highlight-python"><div class="highlight"><pre>mvn clean compile assembly:single
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start the consumer:</p>
+<div class="highlight-python"><div class="highlight"><pre>java -cp target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar \
+    com.hurence.logisland.kafka.simple.Consumer plik group1
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start the producer:</p>
+<div class="highlight-python"><div class="highlight"><pre>java -cp target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar \
+    com.hurence.logisland.kafka.simple.Producer plik
+</pre></div>
+</div>
+</li>
+<li><p class="first">Enter a message in the producer console and check to see whether that
+message appears in the consumer. Try a few messages. Type exit in the
+consumer and producer consoles to close them.</p>
+</li>
+</ol>
+</div>
+<div class="section" id="conclusion">
+<h3>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h3>
+<p>In the first half of this tutorial you&#8217;ve learned the basics of big data
+messaging with Kafka, including a conceptual overview of Kafka, setup
+instructions, and how to configure a producer/consumer messaging system
+with Kafka.</p>
+<p>As you&#8217;ve seen, Kafka&#8217;s architecture is both simple and efficient,
+designed for performance and throughput.</p>
+</div>
+</div>
+<div class="section" id="use-kafka-s-partitions-message-offsets-and-consumer-groups-to-handle-up-to-millions-of-messages-per-day">
+<h2>Use Kafka&#8217;s partitions, message offsets, and consumer groups to handle up to millions of messages per day<a class="headerlink" href="#use-kafka-s-partitions-message-offsets-and-consumer-groups-to-handle-up-to-millions-of-messages-per-day" title="Permalink to this headline">¶</a></h2>
+<p>you&#8217;ll learn how to use partitions to distribute load and scale your
+application horizontally, handling up to millions of messages per day.
+You&#8217;ll also learn how Kafka uses message offsets to track and manage
+complex message processing, and how to protect your Kafka messaging
+system against failure should a consumer go down. We&#8217;ll develop the
+example application from Part 1 for both publish-subscribe and
+point-to-point use cases.</p>
+<div class="section" id="partitions-in-kafka">
+<h3>Partitions in Kafka<a class="headerlink" href="#partitions-in-kafka" title="Permalink to this headline">¶</a></h3>
+<p>Topics in Kafka can be subdivided into partitions. For example, while
+creating a topic named Demo, you might configure it to have three
+partitions. The server would create three log files, one for each of the
+demo partitions. When a producer published a message to the topic, it
+would assign a partition ID for that message. The server would then
+append the message to the log file for that partition only.</p>
+<p>If you then started two consumers, the server might assign partitions 1
+and 2 to the first consumer, and partition 3 to the second consumer.
+Each consumer would read only from its assigned partitions. You can see
+the Demo topic configured for three partitions in Figure 1.</p>
+<p>A partitioned topic in Apache Kafka Figure 1. A partitioned topic in
+Apache Kafka To expand the scenario, imagine a Kafka cluster with two
+brokers, housed in two machines. When you partitioned the demo topic,
+you would configure it to have two partitions and two replicas. For this
+type of configuration, the Kafka server would assign the two partitions
+to the two brokers in your cluster. Each broker would be the leader for
+one of the partitions.</p>
+<p>When a producer published a message, it would go to the partition
+leader. The leader would take the message and append it to the log file
+on the local machine. The second broker would passively replicate that
+commit log to its own machine. If the partition leader went down, the
+second broker would become the new leader and start serving client
+requests. In the same way, when a consumer sent a request to a
+partition, that request would go first to the partition leader, which
+would return the requested messages.</p>
+</div>
+<div class="section" id="benefits-of-partitioning">
+<h3>Benefits of partitioning<a class="headerlink" href="#benefits-of-partitioning" title="Permalink to this headline">¶</a></h3>
+<p>Consider the benefits of partitioning a Kafka-based messaging system:</p>
+<ul class="simple">
+<li><strong>Scalability</strong> : In a system with just one partition, messages
+published to a topic are stored in a log file, which exists on a
+single machine. The number of messages for a topic must fit into a
+single commit log file, and the size of messages stored can never be
+more than that machine&#8217;s disk space. Partitioning a topic lets you
+scale your system by storing messages on different machines in a
+cluster. If you wanted to store 30 gigabytes (GB) of messages for the
+Demo topic, for instance, you could build a Kafka cluster of three
+machines, each with 10 GB of disk space. Then you would configure the
+topic to have three partitions.</li>
+<li><strong>Server-load balancing</strong> : Having multiple partitions lets you
+spread message requests across brokers. For example, If you had a
+topic that processed 1 million messages per second, you could divide
+it into 100 partitions and add 100 brokers to your cluster. Each
+broker would be the leader for single partition, responsible for
+responding to just 10,000 client requests per second.</li>
+<li><strong>Consumer-load balancing</strong> : Similar to server-load balancing,
+hosting multiple consumers on different machine lets you spread the
+consumer load. Let&#8217;s say you wanted to consume 1 million messages per
+second from a topic with 100 partitions. You could create 100
+consumers and run them in parallel. The Kafka server would assign one
+partition to each of the consumers, and each consumer would process
+10,000 messages in parallel. Since Kafka assigns each partition to
+only one consumer, within the partition each message would be
+consumed in order.</li>
+</ul>
+</div>
+<div class="section" id="two-ways-to-partition">
+<h3>Two ways to partition<a class="headerlink" href="#two-ways-to-partition" title="Permalink to this headline">¶</a></h3>
+<p>The producer is responsible for deciding what partition a message will
+go to. The producer has two options for controlling this assignment:</p>
+<ul class="simple">
+<li><strong>Custom partitioner</strong>: You can create a class implementing the
+<tt class="docutils literal"><span class="pre">org.apache.kafka.clients.producer.Partitioner</span></tt> interface. This
+custom Partitioner will implement the business logic to decide where
+messages are sent.</li>
+<li><strong>DefaultPartitioner</strong>: If you don&#8217;t create a custom partitioner
+class, then by default the
+<tt class="docutils literal"><span class="pre">org.apache.kafka.clients.producer.internals.DefaultPartitioner</span></tt>
+class will be used. The default partitioner is good enough for most
+cases, providing three options:<ul>
+<li><strong>Manual</strong>: When you create a <tt class="docutils literal"><span class="pre">ProducerRecord</span></tt>, use the
+overloaded constructor
+<tt class="docutils literal"><span class="pre">new</span> <span class="pre">ProducerRecord(topicName,</span> <span class="pre">partitionId,messageKey,message)</span></tt>
+to specify a partition ID.</li>
+<li><strong>Hashing(Locality sensitive)</strong>: When you create a ProducerRecord,
+specify a messageKey, by calling new
+ProducerRecord(topicName,messageKey,message).
+<tt class="docutils literal"><span class="pre">DefaultPartitioner</span></tt> will use the hash of the key to ensure that
+all messages for the same key go to same producer. This is the
+easiest and most common approach.</li>
+<li><strong>Spraying(Random Load Balancing)</strong>: If you don&#8217;t want to control
+which partition messages go to, simply call
+<tt class="docutils literal"><span class="pre">new</span> <span class="pre">ProducerRecord(topicName,</span> <span class="pre">message)</span></tt> to create your
+<tt class="docutils literal"><span class="pre">ProducerRecord</span></tt>. In this case the partitioner will send
+messages to all the partitions in round-robin fashion, ensuring a
+balanced server load.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="partitioning-a-kafka-application">
+<h3>Partitioning a Kafka application<a class="headerlink" href="#partitioning-a-kafka-application" title="Permalink to this headline">¶</a></h3>
+<p>For the simple producer/consumer example in Part 1, we used a
+<tt class="docutils literal"><span class="pre">DefaultPartitioner</span></tt>. Now we&#8217;ll try creating a custom partitioner
+instead. For this example, let&#8217;s assume that we have a retail site that
+consumers can use to order products anywhere in the world. Based on
+usage, we know that most consumers are in either the United States or
+India. We want to partition our application to send orders from the US
+or India to their own respective consumers, while orders from anywhere
+else will go to a third consumer.</p>
+<p>To start, we&#8217;ll create a <tt class="docutils literal"><span class="pre">CountryPartitioner</span></tt> that implements the
+<tt class="docutils literal"><span class="pre">org.apache.kafka.clients.producer.Partitioner</span></tt> interface. We must
+implement the following methods:</p>
+<p>Kafka will call configure() when we initialize the <tt class="docutils literal"><span class="pre">Partitioner</span></tt>
+class, with a Map of configuration properties. This method initializes
+functions specific to the application&#8217;s business logic, such as
+connecting to a database. In this case we want a fairly generic
+partitioner that takes countryName as a property. We can then use
+<tt class="docutils literal"><span class="pre">configProperties.put(&quot;partitions.0&quot;,&quot;USA&quot;)</span></tt> to map the flow of
+messages to partitions. In the future we can use this format to change
+which countries get their own partition. The Producer API calls
+<tt class="docutils literal"><span class="pre">partition()</span></tt> once for every message. In this case we&#8217;ll use it to
+read the message and parse the name of the country from the message. If
+the name of the country is in the <tt class="docutils literal"><span class="pre">countryToPartitionMap</span></tt>, it will
+return partitionId stored in the Map. If not, it will hash the value of
+the country and use it to calculate which partition it should go to. We
+call <tt class="docutils literal"><span class="pre">close()</span></tt> to shut down the partitioner. Using this method ensures
+that any resources acquired during initialization are cleaned up during
+shutdown. Note that when Kafka calls configure(), the Kafka producer
+will pass all the properties that we&#8217;ve configured for the producer to
+the <tt class="docutils literal"><span class="pre">Partitioner</span></tt> class. It is essential that we read only those
+properties that start with partitions., parse them to get the
+partitionId, and store the ID in <tt class="docutils literal"><span class="pre">countryToPartitionMap</span></tt>.</p>
+<p>Below is our custom implementation of the Partitioner interface.</p>
+<p>Listing 1. CountryPartitioner</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CountryPartitioner</span> <span class="kd">implements</span> <span class="n">Partitioner</span> <span class="o">{</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">Integer</span><span class="o">&gt;</span> <span class="n">countryToPartitionMap</span><span class="o">;</span>
+
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">configure</span><span class="o">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="o">?&gt;</span> <span class="n">configs</span><span class="o">)</span> <span class="o">{</span>
+       <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Inside CountryPartitioner.configure &quot;</span> <span class="o">+</span> <span class="n">configs</span><span class="o">);</span>
+       <span class="n">countryToPartitionMap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Integer</span><span class="o">&gt;();</span>
+       <span class="k">for</span><span class="o">(</span><span class="n">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,?&gt;</span> <span class="n">entry</span><span class="o">:</span> <span class="n">configs</span><span class="o">.</span><span class="na">entrySet</span><span class="o">()){</span>
+           <span class="k">if</span><span class="o">(</span><span class="n">entry</span><span class="o">.</span><span class="na">getKey</span><span class="o">().</span><span class="na">startsWith</span><span class="o">(</span><span class="s">&quot;partitions.&quot;</span><span class="o">)){</span>
+               <span class="n">String</span> <span class="n">keyName</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="na">getKey</span><span class="o">();</span>
+               <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span><span class="n">entry</span><span class="o">.</span><span class="na">getValue</span><span class="o">();</span>
+               <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="n">keyName</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">11</span><span class="o">));</span>
+               <span class="kt">int</span> <span class="n">paritionId</span> <span class="o">=</span> <span class="n">Integer</span><span class="o">.</span><span class="na">parseInt</span><span class="o">(</span><span class="n">keyName</span><span class="o">.</span><span class="na">substring</span><span class="o">(</span><span class="mi">11</span><span class="o">));</span>
+               <span class="n">countryToPartitionMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">value</span><span class="o">,</span><span class="n">paritionId</span><span class="o">);</span>
+           <span class="o">}</span>
+       <span class="o">}</span>
+   <span class="o">}</span>
+
+   <span class="kd">public</span> <span class="kt">int</span> <span class="nf">partition</span><span class="o">(</span><span class="n">String</span> <span class="n">topic</span><span class="o">,</span> <span class="n">Object</span> <span class="n">key</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">keyBytes</span><span class="o">,</span> <span class="n">Object</span> <span class="n">value</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">valueBytes</span><span class="o">,</span>
+                        <span class="n">Cluster</span> <span class="n">cluster</span><span class="o">)</span> <span class="o">{</span>
+       <span class="n">List</span> <span class="n">partitions</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">availablePartitionsForTopic</span><span class="o">(</span><span class="n">topic</span><span class="o">);</span>
+       <span class="n">String</span> <span class="n">valueStr</span> <span class="o">=</span> <span class="o">(</span><span class="n">String</span><span class="o">)</span><span class="n">value</span><span class="o">;</span>
+       <span class="n">String</span> <span class="n">countryName</span> <span class="o">=</span> <span class="o">((</span><span class="n">String</span><span class="o">)</span> <span class="n">value</span><span class="o">).</span><span class="na">split</span><span class="o">(</span><span class="s">&quot;:&quot;</span><span class="o">)[</span><span class="mi">0</span><span class="o">];</span>
+       <span class="k">if</span><span class="o">(</span><span class="n">countryToPartitionMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">countryName</span><span class="o">)){</span>
+           <span class="c1">//If the country is mapped to particular partition return it</span>
+           <span class="k">return</span> <span class="n">countryToPartitionMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">countryName</span><span class="o">);</span>
+       <span class="o">}</span><span class="k">else</span> <span class="o">{</span>
+           <span class="c1">//If no country is mapped to particular partition distribute between remaining partitions</span>
+           <span class="kt">int</span> <span class="n">noOfPartitions</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">topics</span><span class="o">().</span><span class="na">size</span><span class="o">();</span>
+           <span class="k">return</span>  <span class="n">value</span><span class="o">.</span><span class="na">hashCode</span><span class="o">()%</span><span class="n">noOfPartitions</span> <span class="o">+</span> <span class="n">countryToPartitionMap</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">;</span>
+       <span class="o">}</span>
+   <span class="o">}</span>
+
+   <span class="kd">public</span> <span class="kt">void</span> <span class="nf">close</span><span class="o">()</span> <span class="o">{}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>The Producer class in Listing 2 (below) is very similar to our simple
+producer from Part 1, with two changes marked in bold:</p>
+<p>We set a config property with a key equal to the value of
+<tt class="docutils literal"><span class="pre">ProducerConfig.PARTITIONER_CLASS_CONFIG</span></tt>, which matches the fully
+qualified name of our <tt class="docutils literal"><span class="pre">CountryPartitioner</span></tt> class. We also set
+countryName to partitionId, thus mapping the properties that we want to
+pass to <tt class="docutils literal"><span class="pre">CountryPartitioner</span></tt>. We pass an instance of a class
+implementing the <tt class="docutils literal"><span class="pre">org.apache.kafka.clients.producer.Callback</span></tt>
+interface as a second argument to the <tt class="docutils literal"><span class="pre">producer.send()</span></tt> method. The
+Kafka client will call its onCompletion() method once a message is
+successfully published, attaching a <tt class="docutils literal"><span class="pre">RecordMetadata</span></tt> object. We&#8217;ll be
+able to use this object to find out which partition a message was sent
+to, as well as the offset assigned to the published message.</p>
+<p>Listing 2. A partitioned producer</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Producer</span> <span class="o">{</span>
+   <span class="kd">private</span> <span class="kd">static</span> <span class="n">Scanner</span> <span class="n">in</span><span class="o">;</span>
+   <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">argv</span><span class="o">)</span><span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+       <span class="k">if</span> <span class="o">(</span><span class="n">argv</span><span class="o">.</span><span class="na">length</span> <span class="o">!=</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+           <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Please specify 1 parameters &quot;</span><span class="o">);</span>
+           <span class="n">System</span><span class="o">.</span><span class="na">exit</span><span class="o">(-</span><span class="mi">1</span><span class="o">);</span>
+       <span class="o">}</span>
+       <span class="n">String</span> <span class="n">topicName</span> <span class="o">=</span> <span class="n">argv</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>
+       <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Scanner</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">in</span><span class="o">);</span>
+       <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Enter message(type exit to quit)&quot;</span><span class="o">);</span>
+
+       <span class="c1">//Configure the Producer</span>
+       <span class="n">Properties</span> <span class="n">configProperties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+       <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">BOOTSTRAP_SERVERS_CONFIG</span><span class="o">,</span><span class="s">&quot;localhost:9092&quot;</span><span class="o">);</span>
+       <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">KEY_SERIALIZER_CLASS_CONFIG</span><span class="o">,</span><span class="s">&quot;org.apache.kafka.common.serialization.ByteArraySerializer&quot;</span><span class="o">);</span>
+       <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">VALUE_SERIALIZER_CLASS_CONFIG</span><span class="o">,</span><span class="s">&quot;org.apache.kafka.common.serialization.StringSerializer&quot;</span><span class="o">);</span>
+
+           <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ProducerConfig</span><span class="o">.</span><span class="na">PARTITIONER_CLASS_CONFIG</span><span class="o">,</span><span class="n">CountryPartitioner</span><span class="o">.</span><span class="na">class</span><span class="o">.</span><span class="na">getCanonicalName</span><span class="o">());</span>
+       <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;partition.1&quot;</span><span class="o">,</span><span class="s">&quot;USA&quot;</span><span class="o">);</span>
+       <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;partition.2&quot;</span><span class="o">,</span><span class="s">&quot;India&quot;</span><span class="o">);</span>
+
+       <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">kafka</span><span class="o">.</span><span class="na">clients</span><span class="o">.</span><span class="na">producer</span><span class="o">.</span><span class="na">Producer</span> <span class="n">producer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaProducer</span><span class="o">(</span><span class="n">configProperties</span><span class="o">);</span>
+       <span class="n">String</span> <span class="n">line</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">nextLine</span><span class="o">();</span>
+       <span class="k">while</span><span class="o">(!</span><span class="n">line</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&quot;exit&quot;</span><span class="o">))</span> <span class="o">{</span>
+           <span class="n">ProducerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">rec</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ProducerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">topicName</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="n">line</span><span class="o">);</span>
+           <span class="n">producer</span><span class="o">.</span><span class="na">send</span><span class="o">(</span><span class="n">rec</span><span class="o">,</span> <span class="k">new</span> <span class="n">Callback</span><span class="o">()</span> <span class="o">{</span>
+               <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCompletion</span><span class="o">(</span><span class="n">RecordMetadata</span> <span class="n">metadata</span><span class="o">,</span> <span class="n">Exception</span> <span class="n">exception</span><span class="o">)</span> <span class="o">{</span>
+                   <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Message sent to topic -&gt;&quot;</span> <span class="o">+</span> <span class="n">metadata</span><span class="o">.</span><span class="na">topic</span><span class="o">()+</span> <span class="s">&quot; ,parition-&gt;&quot;</span> <span class="o">+</span> <span class="n">metadata</span><span class="o">.</span><span class="na">partition</span><span class="o">()</span> <span class="o">+</span><span class="s">&quot; stored at offset-&gt;&quot;</span> <span class="o">+</span> <span class="n">metadata</span><span class="o">.</span><span class="na">offset</span><span class="o">());</span>
+<span class="o">;</span>
+               <span class="o">}</span>
+           <span class="o">});</span>
+           <span class="n">line</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">nextLine</span><span class="o">();</span>
+       <span class="o">}</span>
+       <span class="n">in</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+       <span class="n">producer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+   <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="assigning-partitions-to-consumers">
+<h3>Assigning partitions to consumers<a class="headerlink" href="#assigning-partitions-to-consumers" title="Permalink to this headline">¶</a></h3>
+<p>The Kafka server guarantees that a partition is assigned to only one
+consumer, thereby guaranteeing the order of message consumption. You can
+manually assign a partition or have it assigned automatically.</p>
+<p>If your business logic demands more control, then you&#8217;ll need to
+manually assign partitions. In this case you would use
+<tt class="docutils literal"><span class="pre">KafkaConsumer.assign(&lt;listOfPartitions&gt;)</span></tt> to pass a list of
+partitions that each consumer was interested in to the Kafka server.</p>
+<p>Having partitions assigned automatically is the default and most common
+choice. In this case, the Kafka server will assign a partition to each
+consumer, and will reassign partitions to scale for new consumers.</p>
+<p>Say you&#8217;re creating a new topic with three partitions. When you start
+the first consumer for the new topic, Kafka will assign all three
+partitions to the same consumer. If you then start a second consumer,
+Kafka will reassign all the partitions, assigning one partition to the
+first consumer and the remaining two partitions to the second consumer.
+If you add a third consumer, Kafka will reassign the partitions again,
+so that each consumer is assigned a single partition. Finally, if you
+start fourth and fifth consumers, then three of the consumers will have
+an assigned partition, but the others won&#8217;t receive any messages. If one
+of the initial three partitions goes down, Kafka will use the same
+partitioning logic to reassign that consumer&#8217;s partition to one of the
+additional consumers.</p>
+<p>We&#8217;ll use automatic assignment for the example application. Most of our
+consumer code will be the same as it was for the simple consumer seen in
+Part 1. The only difference is that we&#8217;ll pass an instance of
+ConsumerRebalanceListener as a second argument to our
+KafkaConsumer.subscribe() method. Kafka will call methods of this class
+every time it either assigns or revokes a partition to this consumer.
+We&#8217;ll override ConsumerRebalanceListener&#8217;s onPartitionsRevoked() and
+onPartitionsAssigned() methods and print the list of partitions that
+were assigned or revoked from this subscriber.</p>
+<p>Listing 3. A partitioned consumer</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ConsumerThread</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">topicName</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">String</span> <span class="n">groupId</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">kafkaConsumer</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">ConsumerThread</span><span class="o">(</span><span class="n">String</span> <span class="n">topicName</span><span class="o">,</span> <span class="n">String</span> <span class="n">groupId</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">topicName</span> <span class="o">=</span> <span class="n">topicName</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">groupId</span> <span class="o">=</span> <span class="n">groupId</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+         <span class="n">Properties</span> <span class="n">configProperties</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Properties</span><span class="o">();</span>
+         <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">BOOTSTRAP_SERVERS_CONFIG</span><span class="o">,</span> <span class="s">&quot;localhost:9092&quot;</span><span class="o">);</span>
+         <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">KEY_DESERIALIZER_CLASS_CONFIG</span><span class="o">,</span> <span class="s">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span><span class="o">);</span>
+         <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">VALUE_DESERIALIZER_CLASS_CONFIG</span><span class="o">,</span> <span class="s">&quot;org.apache.kafka.common.serialization.StringDeserializer&quot;</span><span class="o">);</span>
+         <span class="n">configProperties</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">ConsumerConfig</span><span class="o">.</span><span class="na">GROUP_ID_CONFIG</span><span class="o">,</span> <span class="n">groupId</span><span class="o">);</span>
+
+         <span class="c1">//Figure out where to start processing messages from</span>
+         <span class="n">kafkaConsumer</span> <span class="o">=</span> <span class="k">new</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">configProperties</span><span class="o">);</span>
+         <span class="n">kafkaConsumer</span><span class="o">.</span><span class="na">subscribe</span><span class="o">(</span><span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">topicName</span><span class="o">),</span> <span class="k">new</span> <span class="n">ConsumerRebalanceListener</span><span class="o">()</span> <span class="o">{</span>
+             <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPartitionsRevoked</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;</span><span class="n">TopicPartition</span><span class="o">&gt;</span> <span class="n">partitions</span><span class="o">)</span> <span class="o">{</span>
+                 <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">&quot;%s topic-partitions are revoked from this consumer\n&quot;</span><span class="o">,</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">partitions</span><span class="o">.</span><span class="na">toArray</span><span class="o">()));</span>
+             <span class="o">}</span>
+             <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onPartitionsAssigned</span><span class="o">(</span><span class="n">Collection</span><span class="o">&lt;</span><span class="n">TopicPartition</span><span class="o">&gt;</span> <span class="n">partitions</span><span class="o">)</span> <span class="o">{</span>
+                 <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">&quot;%s topic-partitions are assigned to this consumer\n&quot;</span><span class="o">,</span> <span class="n">Arrays</span><span class="o">.</span><span class="na">toString</span><span class="o">(</span><span class="n">partitions</span><span class="o">.</span><span class="na">toArray</span><span class="o">()));</span>
+             <span class="o">}</span>
+         <span class="o">});</span>
+         <span class="c1">//Start processing messages</span>
+         <span class="k">try</span> <span class="o">{</span>
+             <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                 <span class="n">ConsumerRecords</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">records</span> <span class="o">=</span> <span class="n">kafkaConsumer</span><span class="o">.</span><span class="na">poll</span><span class="o">(</span><span class="mi">100</span><span class="o">);</span>
+                 <span class="k">for</span> <span class="o">(</span><span class="n">ConsumerRecord</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">record</span> <span class="o">:</span> <span class="n">records</span><span class="o">)</span>
+                     <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">record</span><span class="o">.</span><span class="na">value</span><span class="o">());</span>
+             <span class="o">}</span>
+         <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">WakeupException</span> <span class="n">ex</span><span class="o">)</span> <span class="o">{</span>
+             <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Exception caught &quot;</span> <span class="o">+</span> <span class="n">ex</span><span class="o">.</span><span class="na">getMessage</span><span class="o">());</span>
+         <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+             <span class="n">kafkaConsumer</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+             <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;After closing KafkaConsumer&quot;</span><span class="o">);</span>
+         <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="kd">public</span> <span class="n">KafkaConsumer</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="nf">getKafkaConsumer</span><span class="o">()</span> <span class="o">{</span>
+         <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">kafkaConsumer</span><span class="o">;</span>
+        <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-test-the-application">
+<h3>[RUN] Test the application<a class="headerlink" href="#run-test-the-application" title="Permalink to this headline">¶</a></h3>
+<p>We&#8217;re ready to run and test the current iteration of our
+producer/consumer application. As you&#8217;ve done previously, you can use
+the code in Listings 1 through 3, or download the complete source code
+on GitHub.</p>
+<ol class="arabic">
+<li><p class="first">Compile and create a fat JAR by invoking:</p>
+<div class="highlight-python"><div class="highlight"><pre>mvn compile assembly:single
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create a topic named part-demo with three partitions and one
+replication factor:</p>
+<div class="highlight-python"><div class="highlight"><pre>$KAFKA_HOME/bin/kafka-topics.sh --create --zookeeper localhost:2181 \
+    --replication-factor 1 --partitions 3 --topic part-demo
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start a producer:</p>
+<div class="highlight-python"><div class="highlight"><pre>java -cp target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar \
+    com.hurence.logisland.kafka.partition.Producer part-demo
+</pre></div>
+</div>
+</li>
+<li><p class="first">Start three consumers, then watch the console to see how your
+partitions are assigned and revoked every time you start a new
+instance of the consumer:</p>
+<div class="highlight-python"><div class="highlight"><pre>java -cp target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar \
+  com.hurence.logisland.kafka.partition.Consumer part-demo group1
+</pre></div>
+</div>
+</li>
+<li><p class="first">Type some messages into your producer console and verify whether the
+messages are routed to the correct consumer:</p>
+<div class="highlight-python"><div class="highlight"><pre>USA: First order
+India: First order
+USA: Second order
+France: First order
+</pre></div>
+</div>
+</li>
+</ol>
+<p>Being able to partition a single topic into multiple parts is one
+essential to Kafka&#8217;s scalability. Partitioning lets you scale your
+messaging infrastructure horizontally while also maintaining order
+within each partition.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="index.html" title="previous chapter (use the left arrow)">Welcome to Logisland - JDev 2017&#8217;s documentation!</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="atelier-jdev-2-scala.html" title="next chapter (use the right arrow)">2. Functional programming with Scala</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="atelier-jdev-2-scala.html" title="2. Functional programming with Scala"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Logisland - JDev 2017’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Logisland - JDev 2017 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2017, Thomas Bailet. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>

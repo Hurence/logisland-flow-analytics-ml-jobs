@@ -1,0 +1,650 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+  <!-- Licensed under the Apache 2.0 License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/open-sans/stylesheet.css" />
+  <!-- Licensed under the SIL Open Font License -->
+  <link rel="stylesheet" type="text/css" href="_static/fonts/source-serif-pro/source-serif-pro.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap.min.css" />
+  <link rel="stylesheet" type="text/css" href="_static/css/bootstrap-theme.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+    <title>3. An introduction to Big Data analysis with Spark &mdash; Logisland - JDev 2017 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/guzzle.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Logisland - JDev 2017 1.0 documentation" href="index.html" />
+    <link rel="next" title="4. Botnet traces mining with logisland" href="atelier-jdev-4-logisland.html" />
+    <link rel="prev" title="2. Functional programming with Scala" href="atelier-jdev-2-scala.html" />
+  
+   
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="atelier-jdev-4-logisland.html" title="4. Botnet traces mining with logisland"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="atelier-jdev-2-scala.html" title="2. Functional programming with Scala"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Logisland - JDev 2017 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="container-wrapper">
+
+      <div id="mobile-toggle">
+        <a href="#"><span class="glyphicon glyphicon-align-justify" aria-hidden="true"></span></a>
+      </div>
+  <div id="left-column">
+    <div class="sphinxsidebar">
+        <a href="
+    index.html" class="text-logo">Logisland - JDev 2017</a>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <h2>Table Of Contents</h2>
+  </div>
+  <div class="sidebar-toc">
+    
+    
+      <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-1-kafka.html">1. Big data messaging with Kafka</a></li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-2-scala.html">2. Functional programming with Scala</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">3. An introduction to Big Data analysis with Spark</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#interactive-data-exploration-with-spark-rdd">Interactive data exploration with SPARK RDD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interactive-dataframe-analysis-with-spark-shell">Interactive dataframe analysis with spark shell</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#package-and-launch-a-spark-application">Package and launch a Spark application</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="atelier-jdev-4-logisland.html">4. Botnet traces mining with logisland</a></li>
+</ul>
+
+    
+  </div>
+</div>
+        
+<div class="sidebar-block">
+  <div class="sidebar-wrapper">
+    <div id="main-search">
+      <form class="form-inline" action="search.html" method="GET" role="form">
+        <div class="input-group">
+          <input name="q" type="text" class="form-control" placeholder="Search...">
+        </div>
+        <input type="hidden" name="check_keywords" value="yes" />
+        <input type="hidden" name="area" value="default" />
+      </form>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+        <div id="right-column">
+          
+          <div role="navigation" aria-label="breadcrumbs navigation">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Docs</a></li>
+              
+              <li>3. An introduction to Big Data analysis with Spark</li>
+            </ol>
+          </div>
+          
+          <div class="document clearer body">
+            
+  <div class="section" id="an-introduction-to-big-data-analysis-with-spark">
+<h1>3. An introduction to Big Data analysis with Spark<a class="headerlink" href="#an-introduction-to-big-data-analysis-with-spark" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Interactive data exploration with SPARK RDD</li>
+<li>Interactive dataframe analysis with spark shell</li>
+<li>Package and launch a Spark application</li>
+</ul>
+<div class="section" id="interactive-data-exploration-with-spark-rdd">
+<h2>Interactive data exploration with SPARK RDD<a class="headerlink" href="#interactive-data-exploration-with-spark-rdd" title="Permalink to this headline">¶</a></h2>
+<p>In this sequence, we will use the Spark&#8217;s interactive shell to explore
+the <a class="reference external" href="http://dumps.wikimedia.org/other/pagecounts-raw/">Wikipedia web site
+traffic</a>.</p>
+<p>You will then discover how easy an exploratory data analysis with Spark
+(and Scala) can be, in an R (or Python) fashion. You will also see how
+an intuitive/high-level framework like Spark can drastically improve
+data mining in a big data context (by distributing all the processing
+behind the scene and let user manipulates data structures without
+worrying about their sizes) where relational SQL or even Map/Reduce jobs
+would definitely suffers from very high latencies. At last I hope you
+will be impressed by the seamlessly inter-operation between Spark &amp; the
+Hadoop file system.</p>
+<div class="section" id="data-scheme">
+<h3>Data scheme<a class="headerlink" href="#data-scheme" title="Permalink to this headline">¶</a></h3>
+<p>Each request of a page, whether for editing or reading, whether a
+&#8220;special page&#8221; such as a log of actions generated on the fly, or an
+article from Wikipedia or one of the other projects, reaches one of our
+squid caching hosts and the request is sent via UDP to a filter which
+tosses requests from our internal hosts, as well as requests for wikis
+that aren&#8217;t among our general projects. This filter writes out the
+project name, the size of the page requested, and the title of the page
+requested.</p>
+<p>The 1st column is the timestamp (hour granularity), the 2nd is the
+language, the 3rd column is the title of the page retrieved, the 4th
+column is the number of requests, and the 5th column is the size of the
+content returned.</p>
+<p>Here are a few sample lines from one file:</p>
+<div class="highlight-python"><div class="highlight"><pre>20140101-060000 fr Special:Recherche/Acteurs_et_actrices_N 1 739
+20140101-120000 fr Special:Recherche/Agrippa_d/%27Aubign%C3%A9 1 743
+20140101-110000 fr Special:Recherche/All_Mixed_Up 1 730
+20140101-120000 fr Special:Recherche/Andr%C3%A9_Gazut.html 1 737
+</pre></div>
+</div>
+<p>There is one data files :</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /tmp
+wget https://github.com/Hurence/logisland-flow-analytics-ml-jobs/releases/download/v0.1/pagecount_sm.dat.tgz
+tar xzf /tmp/pagecount_sm.dat.tgz
+</pre></div>
+</div>
+<p>We will launch our <em>driver</em> program through the Spark shell. To connect
+to the Spark cluster through the shell, simply type:</p>
+<div class="highlight-python"><div class="highlight"><pre>/usr/local/spark/bin/spark-shell
+</pre></div>
+</div>
+<p>Warm up by creating an RDD (Resilient Distributed Dataset) named
+pagecounts from the HDFS input files. In the Spark shell, the
+SparkContext is already created for you as variable sc.</p>
+<div class="highlight-python"><div class="highlight"><pre>sc
+val pagecounts = sc.textFile(&quot;/tmp/pagecount_sm.dat&quot; )
+</pre></div>
+</div>
+<p>Now have a look to the first line of this file</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pagecounts</span><span class="o">.</span><span class="n">first</span>
+</pre></div>
+</div>
+<p>Let’s take a peek at the data. You can use the take operation of an RDD
+to get the first K records. Here, K = 10.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pagecounts</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Unfortunately this is not very readable because take() returns an array
+and Scala simply prints the array with each element separated by a
+comma. We can make it prettier by traversing the array to print each
+record on its own line.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pagecounts</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">foreach</span><span class="p">(</span><span class="n">println</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Recall from above when we described the format of the data set, that the
+second field is the &#8220;project code&#8221; and contains information about the
+language of the pages. For example, the project code &#8220;fr&#8221; indicates a
+French page. Let’s derive an RDD containing only French pages from
+pagecounts. This can be done by applying a filter function to
+pagecounts. For each record, we can split it by the field delimiter
+(i.e. a space) and get the second field-– and then compare it with the
+string &#8220;fr&#8221;.</p>
+<p>To avoid reading from disks each time we perform any operations on the
+RDD, we also cache the RDD into memory. This is where Spark really
+starts to to shine.</p>
+<p>Now count the number of lines.</p>
+<div class="highlight-python"><div class="highlight"><pre>val enPages = pagecounts.filter(_.split(&quot; &quot;)(1) == &quot;en&quot;).cache
+enPages.count
+</pre></div>
+</div>
+<p>The first time this command is run it will take 2 - 3 minutes while
+Spark scans through the entire data set on disk. But since frPages was
+marked as &#8220;cached” in the previous step, if you run count on the same
+RDD again, it should return an order of magnitude faster.</p>
+<p>If you examine the console log closely, you will see lines like this,
+indicating some data was added to the cache:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">enPages</span><span class="o">.</span><span class="n">count</span>
+</pre></div>
+</div>
+<p>Let’s try something fancier. Generate a histogram of total page views on
+Wikipedia French pages for the date range represented in our dataset.
+The high level idea of what we’ll be doing is as follows. First, we
+generate a key value pair for each line; the key is the date (the first
+eleven characters of the first field), and the value is the number of
+pageviews for that date (the fourth field).</p>
+<div class="highlight-python"><div class="highlight"><pre>val enTuples = enPages.map(line =&gt; line.split(&quot; &quot;))
+val enKeyValuePairs = enTuples.map(line =&gt; (line(0).substring(0, 11), line(3).toInt))
+</pre></div>
+</div>
+<p>Next, we shuffle the data and group all values of the same key together.
+Finally we sum up the values for each key. There is a convenient method
+called <tt class="docutils literal"><span class="pre">reduceByKey</span></tt> in Spark for exactly this pattern. Note that the
+second argument to <tt class="docutils literal"><span class="pre">reduceByKey</span></tt> determines the number of reducers to
+use. By default, Spark assumes that the reduce function is commutative
+and associative and applies combiners on the mapper side. Since we know
+there is a very limited number of keys in this case (because there are
+only 24 unique dates in our data set), let’s use only 5 reducer.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">enKeyValuePairs</span><span class="o">.</span><span class="n">reduceByKey</span><span class="p">(</span><span class="n">_</span><span class="o">+</span><span class="n">_</span> <span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span>
+</pre></div>
+</div>
+<p>The output should look like this (one line for each hour):</p>
+<div class="highlight-python"><div class="highlight"><pre>(20140101-02,546310)
+(20140101-16,1106656)
+(20140101-05,326838)
+(20140101-11,747836)
+(20140101-00,628478)
+(20140101-09,450499)
+(20140101-17,1145666)
+...
+(20140101-06,292195)
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-shuffling">
+<h3>More shuffling<a class="headerlink" href="#more-shuffling" title="Permalink to this headline">¶</a></h3>
+<p>Suppose we want to find pages that were viewed more than 50,000 times
+during the days covered by our dataset. Conceptually, this task is
+similar to the previous query. But, given the large number of pages (23
+million distinct page names), the new task is very expensive. We are
+doing an expensive group-by with a lot of network shuffling of data.</p>
+<p>To recap, first we split each line of data into its respective fields.
+Next, we extract the fields for page name and number of page views. We
+reduce by key again, this time with 40 reducers. Then we filter out
+pages with less than 50,000 total views over our time window represented
+by our dataset.</p>
+<div class="highlight-python"><div class="highlight"><pre>enPages.map(l =&gt; l.split(&quot; &quot;))
+       .map(l =&gt; (l(2), l(3).toInt))
+       .reduceByKey(_+_, 40)
+       .filter(x =&gt; x._2 &gt; 50000)
+       .map(x =&gt; (x._2, x._1))
+       .collect
+       .foreach(println)
+</pre></div>
+</div>
+<p>The output should look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>(607209,Photosynthèse)
+(1441138,Spécial:Page_au_hasard)
+(615936,ALBA)
+(615658,Capacité)
+(615757,Générateur)
+(213476,Stromae)
+(222574,YouTube)
+(616600,Domestique)
+(671299,Terre)
+(239148,Portail:Accueil)
+...
+
+There is no hard and fast way to calculate the optimal number of
+reducers for a given problem; you will build up intuition over time
+by experimenting with different values.
+</pre></div>
+</div>
+</div>
+<div class="section" id="sampling">
+<h3>Sampling<a class="headerlink" href="#sampling" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes (when doing exploratory data analysis over huge datasets),
+it&#8217;s really useful to sample your dataset to extract a representative
+portion. This is how you would proceed to take only 1% of the big
+dataset with 12345 as a random seed.</p>
+<div class="highlight-python"><div class="highlight"><pre>val pagecounts = sc.textFile(&quot;/data/pagecount_sm.dat&quot; )
+val enPages = pagecounts.filter(_.split(&quot; &quot;)(1) == &quot;en&quot;).sample(false, 0.01, 12345)
+enPages.count
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="interactive-dataframe-analysis-with-spark-shell">
+<h2>Interactive dataframe analysis with spark shell<a class="headerlink" href="#interactive-dataframe-analysis-with-spark-shell" title="Permalink to this headline">¶</a></h2>
+<p>get the data if not yet done</p>
+<div class="highlight-python"><div class="highlight"><pre>cd /tmp
+wget https://raw.githubusercontent.com/roberthryniewicz/datasets/master/svepisodes.json -O /tmp/svepisodes.json
+</pre></div>
+</div>
+<p>launch a shell</p>
+<div class="highlight-python"><div class="highlight"><pre>/usr/local/spark/bin/spark-shell
+</pre></div>
+</div>
+<p>Load data into a Spark DataFrame</p>
+<div class="highlight-python"><div class="highlight"><pre>val path = &quot;/tmp/svepisodes.json&quot;
+val svEpisodes = spark.read.json(path)         // Create a DataFrame from JSON data (automatically infer schema and data types)
+</pre></div>
+</div>
+<p>Datasets and DataFrames are distributed collections of data created from
+a variety of sources: JSON and XML files, tables in Hive, external
+databases and more. Conceptually, they are equivalent to a table in a
+relational database or a DataFrame in R or Python. Key difference
+between the Dataset and the DataFrame is that Datasets are strongly
+typed.</p>
+<p>There are complex manipulations possible on Datasets and DataFrames,
+however they are beyond this quick guide.</p>
+<p>To learn more about Datasets and DataFrames checkout this link.</p>
+<p>Print DataFrame Schema</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">svEpisodes</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="data-description">
+<h3>Data Description<a class="headerlink" href="#data-description" title="Permalink to this headline">¶</a></h3>
+<p>Column Name Description 1 Airdate Date when an episode was aired 2
+Airstamp Timestamp when an episode was aired 3 Airtime Length of an
+actual episode airtime (no commercials) 4 Id Unique show id 5 Name Name
+of an episode 6 Number Episode number 7 Runtime Total length of an
+episode (including commercials) 8 Season Show season 9 Summary Brief
+summary of an episode 10 Url Url where more information is available
+online about an episode</p>
+<p>show Datafram content</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">svEpisodes</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>create a temporary SQL view</p>
+<div class="highlight-python"><div class="highlight"><pre>// Creates a temporary view
+svEpisodes.createOrReplaceTempView(&quot;svepisodes&quot;)
+</pre></div>
+</div>
+<p>run basic SQL queries</p>
+<div class="highlight-python"><div class="highlight"><pre>spark.sql(&quot;SELECT * FROM svepisodes ORDER BY season, number&quot;)
+
++----------+--------------------+-------+------+--------------------+------+-------+------+--------------------+--------------------+
+|   airdate|            airstamp|airtime|    id|                name|number|runtime|season|             summary|                 url|
++----------+--------------------+-------+------+--------------------+------+-------+------+--------------------+--------------------+
+|2014-04-06|2014-04-06T22:00:...|  22:00| 10897|Minimum Viable Pr...|     1|     30|     1|Attending an elab...|http://www.tvmaze...|
+|2014-04-13|2014-04-13T22:00:...|  22:00| 10898|       The Cap Table|     2|     30|     1|After a celebrato...|http://www.tvmaze...|
+|2014-04-20|2014-04-20T22:00:...|  22:00| 10899|Articles of Incor...|     3|     30|     1|While Gavin Belso...|http://www.tvmaze...|
+|2014-04-27|2014-04-27T22:00:...|  22:00| 10900|    Fiduciary Duties|     4|     30|     1|At Peter&#39;s toga p...|http://www.tvmaze...|
+|2014-05-04|2014-05-04T22:00:...|  22:00| 10901|      Signaling Risk|     5|     30|     1|Erlich  convinces...|http://www.tvmaze...|
+|2014-05-11|2014-05-11T22:00:...|  22:00| 10902|Third Party Insou...|     6|     30|     1|Richard feels thr...|http://www.tvmaze...|
+|2014-05-18|2014-05-18T22:00:...|  22:00| 10903|    Proof of Concept|     7|     30|     1|At TechCrunch Dis...|http://www.tvmaze...|
+|2014-06-01|2014-06-01T22:00:...|  22:00| 10904|Optimal Tip-to-Ti...|     8|     30|     1|Poised to compete...|http://www.tvmaze...|
+|2015-04-12|2015-04-12T22:00:...|  22:00|117409|   Sand Hill Shuffle|     1|     30|     2|Season 2 begins w...|http://www.tvmaze...|
+|2015-04-19|2015-04-19T22:00:...|  22:00|142992| Runaway Devaluation|     2|     30|     2|Pied Piper could ...|http://www.tvmaze...|
+|2015-04-26|2015-04-26T22:00:...|  22:00|142993|           Bad Money|     3|     30|     2|Richard mulls a p...|http://www.tvmaze...|
+|2015-05-03|2015-05-03T22:00:...|  22:00|142994|            The Lady|     4|     30|     2|Richard butts hea...|http://www.tvmaze...|
+|2015-05-10|2015-05-10T22:00:...|  22:00|153965|        Server Space|     5|     30|     2|Gavin creates int...|http://www.tvmaze...|
+|2015-05-17|2015-05-17T22:00:...|  22:00|154580|            Homicide|     6|     30|     2|Erlich runs into ...|http://www.tvmaze...|
+|2015-05-24|2015-05-24T22:00:...|  22:00|155129|       Adult Content|     7|     30|     2|The team fields j...|http://www.tvmaze...|
+|2015-05-31|2015-05-31T22:00:...|  22:00|155130| White Hat/Black Hat|     8|     30|     2|Richard gets para...|http://www.tvmaze...|
+|2015-06-07|2015-06-07T22:00:...|  22:00|155199| Binding Arbitration|     9|     30|     2|Erlich wants to t...|http://www.tvmaze...|
+|2015-06-14|2015-06-14T22:00:...|  22:00|155200|Two Days of The C...|    10|     30|     2|As the guys await...|http://www.tvmaze...|
+|2016-04-24|2016-04-24T22:00:...|  22:00|560883|    Founder Friendly|     1|     30|     3|After being uncer...|http://www.tvmaze...|
+|2016-05-01|2016-05-01T22:00:...|  22:00|668661|      Two in the Box|     2|     30|     3|The new and impro...|http://www.tvmaze...|
++----------+--------------------+-------+------+--------------------+------+-------+------+--------------------+--------------------+
+</pre></div>
+</div>
+<p>OK, so now let’s run a slightly more complex SQL query on the underlying
+table data.</p>
+<p>Total Number of Episodes</p>
+<div class="highlight-python"><div class="highlight"><pre>spark.sql(&quot;SELECT count(1) AS TotalNumEpisodes FROM svepisodes&quot;).show()
+
++----------------+
+|TotalNumEpisodes|
++----------------+
+|              28|
++----------------+
+</pre></div>
+</div>
+<p>Number of Episodes per Season</p>
+<div class="highlight-python"><div class="highlight"><pre>spark.sql(&quot;SELECT season, count(number) as episodes FROM svepisodes GROUP BY season&quot;).show()
+
++------+--------+
+|season|episodes|
++------+--------+
+|     1|       8|
+|     3|      10|
+|     2|      10|
++------+--------+
+</pre></div>
+</div>
+</div>
+<div class="section" id="word-count-on-episode-summaries">
+<h3>Word Count on Episode Summaries<a class="headerlink" href="#word-count-on-episode-summaries" title="Permalink to this headline">¶</a></h3>
+<p>Now let’s perform a basic word-count on the summary column and find out
+which words occur most frequently. This should give us some indication
+on the popularity of certain characters and other relevant keywords in
+the context of the Sillicon Valley show.</p>
+<p>raw version</p>
+<div class="highlight-python"><div class="highlight"><pre>import org.apache.spark.sql.functions._                        // Import additional helper functions
+
+val svSummaries = svEpisodes.select(&quot;summary&quot;).as[String]      // Convert to String type (becomes a Dataset)
+
+// Extract individual words
+val words = svSummaries
+  .flatMap(_.split(&quot;\\s+&quot;))                             // Split on whitespace
+  .filter(_ != &quot;&quot;)                                      // Remove empty words
+  .map(_.toLowerCase())                                 // Lowercase
+
+words.show()
+
++----------+
+|     value|
++----------+
+| attending|
+|        an|
+| elaborate|
+|    launch|
+|    party,|
+|   richard|
+|       and|
+|       his|
+|  computer|
+|programmer|
+|   friends|
+|         -|
+|       big|
+|     head,|
+|    dinesh|
+|       and|
+|  gilfoyle|
+|         -|
+|     dream|
+|        of|
++----------+
+
+// Word count
+words.groupByKey(value =&gt; value)                        // Group by word
+     .count()                                           // Count
+     .orderBy($&quot;count(1)&quot; desc)                         // Order by most frequent
+     .show()                                            // Display results
+
++-------+--------+
+|  value|count(1)|
++-------+--------+
+|      a|      59|
+|     to|      48|
+|    and|      40|
+|    the|      38|
+|richard|      26|
+|   pied|      24|
+|     of|      16|
+| erlich|      16|
+|    his|      16|
+| dinesh|      16|
+|  gavin|      14|
+|     at|      14|
+|    for|      12|
+|  piper|      12|
+|     in|      12|
+|     by|      12|
+|    big|      11|
+|  jared|      11|
+|  about|      10|
+|   with|       9|
++-------+--------+
+</pre></div>
+</div>
+<p>As you can see there are plenty of stop words and punctuation marks that
+surface to the top. Let’s clean this up a bit by creating a basic stop
+word list and a punctuation mark list that we’ll use as basic filters
+before we aggregate and order the words again.</p>
+<div class="highlight-python"><div class="highlight"><pre>val stopWords = List(&quot;a&quot;, &quot;an&quot;, &quot;to&quot;, &quot;and&quot;, &quot;the&quot;, &quot;of&quot;, &quot;in&quot;, &quot;for&quot;, &quot;by&quot;, &quot;at&quot;)      // Basic set of stop words
+val punctuationMarks = List(&quot;-&quot;, &quot;,&quot;, &quot;;&quot;, &quot;:&quot;, &quot;.&quot;, &quot;?&quot;, &quot;!&quot;)                          // Basic set of punctuation marks
+
+// Filter out stop words and punctuation marks
+val wordsFiltered = words                                                               // Create a new Dataset
+    .filter(!stopWords.contains(_))                                                     // Remove stop words
+    .filter(!punctuationMarks.contains(_))                                              // Remove punctuation marks
+
+// Word count
+wordsFiltered
+  .groupBy($&quot;value&quot; as &quot;word&quot;)                          // Group on values (default) column name
+  .agg(count(&quot;*&quot;) as &quot;occurences&quot;)                      // Aggregate
+  .orderBy($&quot;occurences&quot; desc)                          // Display most common words first
+  .show()                                               // Display results
+
+
++----------+----------+
+|      word|occurences|
++----------+----------+
+|   richard|        26|
+|      pied|        24|
+|       his|        16|
+|    erlich|        16|
+|    dinesh|        16|
+|     gavin|        14|
+|     piper|        12|
+|     jared|        11|
+|       big|        11|
+|     about|        10|
+|  gilfoyle|         9|
+|      guys|         9|
+|      with|         9|
+|      when|         9|
+|        is|         9|
+|      that|         9|
+|    monica|         9|
+|       new|         9|
+|meanwhile,|         8|
+|   piper&#39;s|         8|
++----------+----------+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="package-and-launch-a-spark-application">
+<h2>Package and launch a Spark application<a class="headerlink" href="#package-and-launch-a-spark-application" title="Permalink to this headline">¶</a></h2>
+<p>Ressources management (RAM and CPU cores) in a distributed environment
+is quite a bit of a challenge. That&#8217;s why some brand new job schedulers
+like YARN arise from Hadoop 2 release. With Spark you can use 3
+different ways of job scheduling:</p>
+<ol class="arabic simple">
+<li><strong>Local mode</strong> (<em>FIFO</em> job scheduling and <em>FAIR</em> scheduling if
+ressources are available)</li>
+<li><strong>Yarn</strong> (takes the job and runs it as well as possible according to
+available resources)</li>
+<li><strong>Mesos</strong> (offers resources to clients which can submit jobs if
+resources are sufficient)</li>
+</ol>
+<p>For now we&#8217;ve just used the Spark shell application to run our jobs.
+That&#8217;s usefull in a development environment but for production, you&#8217;ll
+certainly want to run your jobs simultaneously over the cluster and
+share efficiently those resources. To do that, we need both a job
+scheduler and a job.</p>
+<div class="section" id="job-source-file">
+<h3>Job source file<a class="headerlink" href="#job-source-file" title="Permalink to this headline">¶</a></h3>
+<p>Now it&#8217;s time to define the content of the job in the file
+<tt class="docutils literal"><span class="pre">src/main/scala/SimpleApp.scala</span></tt>. Please note the <tt class="docutils literal"><span class="pre">SparkConf</span></tt>
+definition section where you set up how much memory will be used by each
+executor, how many cpu core shall be used and the kind of scheduling you
+want to use (FIFO or FAIR).</p>
+<div class="highlight-python"><div class="highlight"><pre>package com.hurence.logisland.job
+
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
+
+object SimpleApp {
+    def main(args: Array[String]) {
+
+        // job configuration
+        val conf = new SparkConf().setAppName(&quot;Simple App&quot;)
+        val sc = new SparkContext(conf)
+
+        // job definition
+        var file = &quot;/tmp/pagecount_sm.dat&quot;
+        val pagecounts = sc.textFile( file )
+        val enPages = pagecounts.filter(_.split(&quot; &quot;)(1) == &quot;en&quot;)
+        val enPageCount = enPages.count
+        println(&quot;Page count for EN pages: %s&quot;.format(enPageCount))
+
+    }
+}
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-build-that-job">
+<h3>Run &amp; build that job<a class="headerlink" href="#run-build-that-job" title="Permalink to this headline">¶</a></h3>
+<p>We first need to compile and package the source files and dependencies</p>
+<div class="highlight-python"><div class="highlight"><pre>mvn compile assembly:single
+</pre></div>
+</div>
+<p>And then we can run the job from multiples threads with</p>
+<div class="highlight-python"><div class="highlight"><pre>/usr/local/spark/bin/spark-submit --class com.hurence.logisland.job.SimpleApp \
+    target/logisland-flow-analytics-ml-jobs-0.10.1-jar-with-dependencies.jar
+</pre></div>
+</div>
+<p>Let&#8217;s have a look to <a class="reference external" href="http://HOST_IP:8080">http://HOST_IP:8080</a> cluster web ui to get details
+about the differents jobs running along the cluster. The
+<tt class="docutils literal"><span class="pre">Simple</span> <span class="pre">App</span> <span class="pre">counts</span> <span class="pre">the</span> <span class="pre">lines</span> <span class="pre">of</span> <span class="pre">French</span> <span class="pre">pages</span> <span class="pre">access</span> <span class="pre">in</span></tt>/data/pagecount_sm.dat`
+file.</p>
+<div class="highlight-python"><div class="highlight"><pre>...
+
+Page count for FR pages: 7926641
+14/05/05 15:48:02 INFO ConnectionManager: Selector thread was interrupted!
+[success] Total time: 49 s, completed May 5, 2014 3:48:02 PM
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+            
+  <div class="footer-relations">
+    
+      <div class="pull-left">
+        <a class="btn btn-default" href="atelier-jdev-2-scala.html" title="previous chapter (use the left arrow)">2. Functional programming with Scala</a>
+      </div>
+    
+      <div class="pull-right">
+        <a class="btn btn-default" href="atelier-jdev-4-logisland.html" title="next chapter (use the right arrow)">4. Botnet traces mining with logisland</a>
+      </div>
+    </div>
+    <div class="clearer"></div>
+  
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="atelier-jdev-4-logisland.html" title="4. Botnet traces mining with logisland"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="atelier-jdev-2-scala.html" title="2. Functional programming with Scala"
+             >previous</a> |</li>
+        <li><a href="index.html">Logisland - JDev 2017 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<script type="text/javascript">
+  $("#mobile-toggle a").click(function () {
+    $("#left-column").toggle();
+  });
+</script>
+<script type="text/javascript" src="_static/js/bootstrap.js"></script>
+  <div class="footer">
+    &copy; Copyright 2017, Thomas Bailet. Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+  </div>
+  </body>
+</html>
